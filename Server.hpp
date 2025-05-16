@@ -10,4 +10,28 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
+#include <iostream>
+
+class Server
+{
+	public:
+		Server(int port, const std::string & password);
+		
+		~Server();
+		
+	private:
+		int _port;
+		std::string _password;
+		
+		bool isPortValid(int port);
+		bool isPswdValid(std::string pswd);
+		
+		Server();
+		Server(const Server &source);
+		Server & operator = (const Server &source);
+};
+
+#endif
