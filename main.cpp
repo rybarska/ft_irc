@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include <cstdlib> // for std::atoi
+#include <cstdlib> // for std::atoi()
 #include <sstream>
 
 bool isOnlyWhitespace(int argc, char **argv)
