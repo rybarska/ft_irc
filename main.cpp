@@ -38,6 +38,8 @@ int main(int argc, char **argv)
 		std::string password(argv[2]);
 		
 		Server server(port, password);
+		
+		server.init();
 	}
 	catch (const std::exception& e)
 	{

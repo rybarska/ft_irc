@@ -14,10 +14,12 @@
 #define SERVER_HPP
 
 #include <iostream>
+#include <errno.h>
 #include <unistd.h> // for close()
 #include <netdb.h> // for struct addrinfo, getaddrinfo()
 #include <cstring> //for memset()
 #include <sstream>
+#include <sys/socket.h>
 
 class Server
 {
@@ -26,19 +28,22 @@ class Server
 		
 		~Server();
 		
+		bool init();
 	private:
 		int _sockfd;
 		int _port;
 		std::string _password;
 		std::string _host;
 		int _status;
-		struct addrinfo _hints;
-		struct addrinfo *_servinfo;
+		struct addrinfo _hints; // will point to struct addrinfo that we fill out
+		struct addrinfo *_servinfo; // will point to the results
 		
 		bool isPortValid(int port);
 		bool isPswdValid(std::string pswd);
 		
 		bool setAddrInfo(std::string &host);
+		
+		bool setSocket();
 		
 		Server();
 		Server(const Server &source);
