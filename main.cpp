@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 		
 		Server server(port, password);
 		
-		server.startListening();
+		server.getGoing();
 	}
 	catch (const std::exception& e)
 	{

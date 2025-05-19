@@ -33,7 +33,7 @@ class Server
 		
 		~Server();
 		
-		bool startListening();
+		bool getGoing();
 	private:
 		int _sockfd;
 		int _port;
@@ -48,9 +48,11 @@ class Server
 		bool isPortValid(int port);
 		bool isPswdValid(const std::string &pswd);
 		
-		bool setAddrInfo(std::string &_ipAddress);
+		bool configAddrInfo(std::string &_ipAddress);
 		
 		bool setListeningSocket();
+		
+		void setNewConnection();
 		
 		Server();
 		Server(const Server &source);

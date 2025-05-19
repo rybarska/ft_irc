@@ -19,7 +19,7 @@ Server::Server(int port, const std::string &password)
 		throw std::invalid_argument("Invalid port: number must be between 1024 and 65535");
 	if (!isPswdValid(password))
 		throw std::invalid_argument("Invalid password: length must be between 6 and 64");
-	if (!setAddrInfo(_ipAddress))
+	if (!configAddrInfo(_ipAddress))
 		throw std::runtime_error("Could not set addrinfo");
 };
 
@@ -45,7 +45,7 @@ bool Server::isPswdValid(const std::string &pswd)
 	return pswd.length() >= 6 && pswd.length() <= 64;
 };
 
-bool Server::setAddrInfo(std::string &_ipAddress)
+bool Server::configAddrInfo(std::string &_ipAddress)
 {
 	std::ostringstream portStream;
 	portStream << _port;
@@ -115,13 +115,65 @@ bool Server::setListeningSocket()
 	return true;
 }
 
-bool Server::startListening()
+void Server::setNewConnection()
+{
+	struct sockaddr_storage clientAddr;
+	socklen_t addrSize = sizeof clientAddr;
+	
+	int clientfd = accept(_sockfd, (struct sockaddr *)&clientAddr, &addrSize);
+	if (clientfd == -1)
+	{
+		std::cerr << "Error (accept): " << std::strerror(errno) << std::endl;
+		return ;
+	}
+	
+	std::cout << "New client connection accepted at fd " << clientfd << std::endl;
+	
+	struct pollfd newClient;
+	newClient.fd = clientfd;
+	newClient.events = POLLIN;
+	_pollfds.push_back(newClient);
+}
+
+bool Server::getGoing()
 {
 	if (!setListeningSocket())
 		throw std::runtime_error("Could not set socket");
 	
-	// while (true)
-	// 	call poll()
+	struct pollfd pfd;
+	pfd.fd = _sockfd;
+	pfd.events = POLLIN;
+	_pollfds.push_back(pfd);
+	
+	while (true)
+	{
+		if (_pollfds.empty())
+			continue ;
+		
+		int eventCount = poll(_pollfds.data(), _pollfds.size(), -1);
+		if (eventCount == -1)
+		{
+			std::cerr << "Error (poll): " << std::strerror(errno) << std::endl;
+			break ;
+		}
+		
+		// iterate through connections
+		for (size_t i=0; i < _pollfds.size(); i++)
+		{
+			// check if a connection is ready to read
+			if (_pollfds[i].revents & (POLLIN | POLLHUP))
+			{
+				if (_pollfds[i].fd == _sockfd)
+				{
+					setNewConnection(); //TODO
+				}
+				/*else
+				{
+					handleClientMessage(); //TODO
+				}*/
+			}
+		}
+	}
 	
 	return true;
 }
