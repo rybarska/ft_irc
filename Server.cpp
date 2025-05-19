@@ -165,7 +165,7 @@ bool Server::getGoing()
 			{
 				if (_pollfds[i].fd == _sockfd)
 				{
-					setNewConnection(); //TODO
+					setNewConnection();
 				}
 				/*else
 				{
