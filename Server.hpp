@@ -20,6 +20,11 @@
 #include <cstring> //for memset()
 #include <sstream>
 #include <sys/socket.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <vector>
+
+#define BACKLOG 10 // number of pending connections that the queue will hold
 
 class Server
 {
@@ -28,22 +33,24 @@ class Server
 		
 		~Server();
 		
-		bool init();
+		bool startListening();
 	private:
 		int _sockfd;
 		int _port;
 		std::string _password;
-		std::string _host;
+		std::string _ipAddress;
 		int _status;
 		struct addrinfo _hints; // will point to struct addrinfo that we fill out
 		struct addrinfo *_servinfo; // will point to the results
 		
+		std::vector<struct pollfd> _pollfds;
+		
 		bool isPortValid(int port);
-		bool isPswdValid(std::string pswd);
+		bool isPswdValid(const std::string &pswd);
 		
-		bool setAddrInfo(std::string &host);
+		bool setAddrInfo(std::string &_ipAddress);
 		
-		bool setSocket();
+		bool setListeningSocket();
 		
 		Server();
 		Server(const Server &source);

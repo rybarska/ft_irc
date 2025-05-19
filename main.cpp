@@ -24,22 +24,40 @@ bool isOnlyWhitespace(int argc, char **argv)
 	return (true);
 }
 
+bool parseArgs(int argc, char **argv, int &port, std::string &password)
+{
+	if (argc != 3 || isOnlyWhitespace(argc, argv))
+	{
+		std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;
+		return (false);
+	}
+	
+	std::istringstream iss(argv[1]);
+	iss >> port;
+	if (!iss.eof() || iss.fail() || port <= 1024 || port >= 65535)
+	{
+		std::cerr << "Error: port must be a number between 1024 and 65535" << std::endl;
+		return (false);
+	}
+	
+	password = argv[2];
+	
+	return (true);
+}
+
 int main(int argc, char **argv)
 {	
 	try
 	{
-		if (argc != 3 || isOnlyWhitespace(argc, argv))
-		{
-			std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;
-			return (1);
-		}
+		int port;
+		std::string password;
 		
-		int port = std::atoi(argv[1]);
-		std::string password(argv[2]);
+		if (!parseArgs(argc, argv, port, password))
+			return (1);
 		
 		Server server(port, password);
 		
-		server.init();
+		server.startListening();
 	}
 	catch (const std::exception& e)
 	{
