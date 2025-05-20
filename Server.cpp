@@ -15,10 +15,6 @@
 Server::Server(int port, const std::string &password)
 : _sockfd(-1), _port(port), _password(password), _ipAddress("127.0.0.1"), _servinfo(NULL)
 {
-	if (!isPortValid(port))
-		throw std::invalid_argument("Invalid port: number must be between 1024 and 65535");
-	if (!isPswdValid(password))
-		throw std::invalid_argument("Invalid password: length must be between 6 and 64");
 	if (!configAddrInfo(_ipAddress))
 		throw std::runtime_error("Could not set addrinfo");
 };
@@ -33,16 +29,6 @@ Server::~Server()
 		std::cout << "Socket closed" << std::endl;
 	}
 	std::cout << "Server shutting down" << std::endl;
-};
-
-bool Server::isPortValid(int port)
-{
-	return port >= 1024 && port <= 65535;
-};
-
-bool Server::isPswdValid(const std::string &pswd)
-{
-	return pswd.length() >= 6 && pswd.length() <= 64;
 };
 
 bool Server::configAddrInfo(std::string &_ipAddress)
@@ -115,7 +101,7 @@ bool Server::setListeningSocket()
 	return true;
 }
 
-void Server::setNewConnection()
+bool Server::acceptNewClient()
 {
 	struct sockaddr_storage clientAddr;
 	socklen_t addrSize = sizeof clientAddr;
@@ -124,22 +110,52 @@ void Server::setNewConnection()
 	if (clientfd == -1)
 	{
 		std::cerr << "Error (accept): " << std::strerror(errno) << std::endl;
-		return ;
+		return false;
 	}
 	
-	std::cout << "New client connection accepted at fd " << clientfd << std::endl;
+	std::cout << "New connection established at fd " << clientfd << std::endl;
 	
 	struct pollfd newClient;
 	newClient.fd = clientfd;
 	newClient.events = POLLIN;
 	_pollfds.push_back(newClient);
+	
+	return true;
 }
 
-bool Server::getGoing()
+bool Server::processClientInput(size_t index)
 {
-	if (!setListeningSocket())
-		throw std::runtime_error("Could not set socket");
+	int clientfd = _pollfds[index].fd;
+	char buffer[1024];
+	int bufLen = sizeof(buffer) - 1;
+	int flags = 0;
 	
+	// readout comes in bytes
+	ssize_t readout = recv(clientfd, buffer, bufLen, flags);
+	if (readout <= 0)
+	{
+		if (readout == 0)
+		{
+			std::cout << "Connection at fd " << clientfd << " closed." << std::endl;
+		}
+		else
+		{
+			std::cerr << "Error (recv): " << std::strerror(errno) << std::endl;
+		}
+		close (clientfd);
+		_pollfds.erase(_pollfds.begin() + index);
+		return false;
+	}
+	else
+	{
+		buffer[readout] = '\0';
+		std::cout << "Message from fd " << clientfd << ": " << buffer << std::endl;
+		return true;
+	}
+}
+
+void Server::pollEvents()
+{
 	struct pollfd pfd;
 	pfd.fd = _sockfd;
 	pfd.events = POLLIN;
@@ -165,15 +181,25 @@ bool Server::getGoing()
 			{
 				if (_pollfds[i].fd == _sockfd)
 				{
-					setNewConnection();
+					if (!acceptNewClient())
+						continue ;
 				}
-				/*else
+				else
 				{
-					handleClientMessage(); //TODO
-				}*/
+					if (processClientInput(i))
+						continue ;
+				}
 			}
 		}
 	}
+}
+
+bool Server::getGoing()
+{
+	if (!setListeningSocket())
+		throw std::runtime_error("Could not set socket");
+	
+	pollEvents();
 	
 	return true;
 }

@@ -24,7 +24,7 @@ bool isOnlyWhitespace(int argc, char **argv)
 	return (true);
 }
 
-bool parseArgs(int argc, char **argv, int &port, std::string &password)
+bool parseCommandLineArgs(int argc, char **argv, int &port, std::string &password)
 {
 	if (argc != 3 || isOnlyWhitespace(argc, argv))
 	{
@@ -41,6 +41,11 @@ bool parseArgs(int argc, char **argv, int &port, std::string &password)
 	}
 	
 	password = argv[2];
+	if (password.length() < 6 || password.length() > 64)
+	{
+		std::cerr << "Error: password length must be between 6 and 64" << std::endl;
+		return (false);
+	}
 	
 	return (true);
 }
@@ -52,7 +57,7 @@ int main(int argc, char **argv)
 		int port;
 		std::string password;
 		
-		if (!parseArgs(argc, argv, port, password))
+		if (!parseCommandLineArgs(argc, argv, port, password))
 			return (1);
 		
 		Server server(port, password);

@@ -44,14 +44,12 @@ class Server
 		
 		std::vector<struct pollfd> _pollfds;
 		
-		bool isPortValid(int port);
-		bool isPswdValid(const std::string &pswd);
-		
 		bool configAddrInfo(std::string &_ipAddress);
 		
 		bool setListeningSocket();
-		
-		void setNewConnection();
+		void pollEvents();
+		bool acceptNewClient();
+		bool processClientInput(size_t index);
 		
 		Server();
 		Server(const Server &source);
