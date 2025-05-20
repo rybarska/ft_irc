@@ -13,7 +13,3 @@ it is **not possible** to implement secure authentication, password handling, or
 Any password storage, verification, or data transmission in this project should be considered **insecure** and vulnerable to common attacks (e.g., sniffing, spoofing, replay, brute force).
 
 The focus of this project is on learning how IRC-like protocols and server/client architecture work — **not** on implementing production-grade security.
-
----
-
-> 🛡️ *I understand these limitations and know how to implement secure systems with the proper tools — but this project’s rules prohibit doing so.*
