@@ -24,8 +24,10 @@
 #include <sys/socket.h>
 #include <poll.h>
 #include <vector>
+#include <map>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "Client.hpp"
 
 #define BACKLOG 10 // number of pending connections that the queue will hold
 
@@ -46,6 +48,8 @@ class Server
 		struct addrinfo *_servinfo; // will point to the results
 		
 		std::vector<struct pollfd> _pollfds;
+		
+		std::map<int, Client> clients;
 		
 		bool configAddrInfo();
 		
