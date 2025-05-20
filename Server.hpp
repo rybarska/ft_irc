@@ -55,7 +55,7 @@ class Server
 		
 		bool setListeningSocket();
 		void pollEvents();
-		bool acceptNewClient();
+		bool pushNewClient();
 		bool processClientInput(size_t index);
 		
 		Server();

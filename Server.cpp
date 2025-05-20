@@ -101,7 +101,7 @@ bool Server::setListeningSocket()
 	return true;
 }
 
-bool Server::acceptNewClient()
+bool Server::pushNewClient()
 {
 	struct sockaddr_storage clientAddr;
 	socklen_t addrSize = sizeof clientAddr;
@@ -185,7 +185,7 @@ void Server::pollEvents()
 			{
 				if (_pollfds[i].fd == _sockfd)
 				{
-					if (!acceptNewClient())
+					if (!pushNewClient())
 						continue ;
 				}
 				else
