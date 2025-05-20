@@ -20,7 +20,6 @@
 #include <cstring> //for memset()
 #include <sstream>
 #include <sys/socket.h>
-#include <fcntl.h>
 #include <poll.h>
 #include <vector>
 
