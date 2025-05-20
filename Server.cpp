@@ -13,11 +13,11 @@
 #include "Server.hpp"
 
 Server::Server(int port, const std::string &password)
-: _sockfd(-1), _port(port), _password(password), _ipAddress("127.0.0.1"), _servinfo(NULL)
+: _sockfd(-1), _port(port), _password(password), _servinfo(NULL)
 {
-	if (!configAddrInfo(_ipAddress))
+	if (!configAddrInfo())
 		throw std::runtime_error("Could not set addrinfo");
-};
+}
 
 Server::~Server()
 {
@@ -29,9 +29,9 @@ Server::~Server()
 		std::cout << "Socket closed" << std::endl;
 	}
 	std::cout << "Server shutting down" << std::endl;
-};
+}
 
-bool Server::configAddrInfo(std::string &_ipAddress)
+bool Server::configAddrInfo()
 {
 	std::ostringstream portStream;
 	portStream << _port;
@@ -43,7 +43,7 @@ bool Server::configAddrInfo(std::string &_ipAddress)
 	_hints.ai_socktype = SOCK_STREAM; // SOCK_STREAM - TCP stream socket, not SOCK_DGRAM
 	_hints.ai_flags = AI_PASSIVE; // AI_PASSIVE - to fill in our IP
 	
-	_status = getaddrinfo(_ipAddress.c_str(), portString.c_str(), &_hints, &_servinfo);
+	_status = getaddrinfo(NULL, portString.c_str(), &_hints, &_servinfo);
 	if (_status != 0)
 	{
 		std::cerr << "Error (getaddrinfo): " << gai_strerror(_status) << std::endl;
@@ -118,6 +118,7 @@ bool Server::acceptNewClient()
 	struct pollfd newClient;
 	newClient.fd = clientfd;
 	newClient.events = POLLIN;
+	newClient.revents = 0;
 	_pollfds.push_back(newClient);
 	
 	return true;
@@ -155,10 +156,11 @@ bool Server::processClientInput(size_t index)
 }
 
 void Server::pollEvents()
-{
+{	
 	struct pollfd pfd;
 	pfd.fd = _sockfd;
 	pfd.events = POLLIN;
+	pfd.revents = 0;
 	_pollfds.push_back(pfd);
 	
 	while (true)
@@ -167,6 +169,8 @@ void Server::pollEvents()
 			continue ;
 		
 		int eventCount = poll(_pollfds.data(), _pollfds.size(), -1);
+		//int eventCount = poll(_pollfds.data(), 1, -1);
+		
 		if (eventCount == -1)
 		{
 			std::cerr << "Error (poll): " << std::strerror(errno) << std::endl;

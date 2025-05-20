@@ -15,13 +15,17 @@
 
 #include <iostream>
 #include <errno.h>
+#include <stdexcept> // for runtime_error
 #include <unistd.h> // for close()
 #include <netdb.h> // for struct addrinfo, getaddrinfo()
+#include <netinet/in.h>
 #include <cstring> //for memset()
 #include <sstream>
 #include <sys/socket.h>
 #include <poll.h>
 #include <vector>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define BACKLOG 10 // number of pending connections that the queue will hold
 
@@ -37,14 +41,13 @@ class Server
 		int _sockfd;
 		int _port;
 		std::string _password;
-		std::string _ipAddress;
 		int _status;
 		struct addrinfo _hints; // will point to struct addrinfo that we fill out
 		struct addrinfo *_servinfo; // will point to the results
 		
 		std::vector<struct pollfd> _pollfds;
 		
-		bool configAddrInfo(std::string &_ipAddress);
+		bool configAddrInfo();
 		
 		bool setListeningSocket();
 		void pollEvents();
