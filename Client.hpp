@@ -27,6 +27,7 @@ class Client
 		std::string const &getPassword() const;
 		std::string const &getNickname() const;
 		std::string const &getUsername() const;
+		RingBuffer<char, 1024> &getRingBuffer();
 		
 		void setNickname(const std::string &nickname);
 		void setUsername(const std::string &username);

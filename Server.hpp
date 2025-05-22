@@ -59,6 +59,8 @@ class Server
 		bool pushNewClient();
 		bool processClientInput(size_t index);
 		
+		bool getLineFromRingBuffer(Client *client, std::string &line);
+		
 		Server();
 		Server(const Server &source);
 		Server & operator = (const Server &source);

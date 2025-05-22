@@ -39,6 +39,11 @@ std::string const &Client::getUsername() const
 	return _username;
 }
 
+RingBuffer<char, 1024> &Client::getRingBuffer()
+{
+	return _ringbuffer;
+}
+
 void Client::setNickname(const std::string &nickname)
 {
 	_nickname = nickname;

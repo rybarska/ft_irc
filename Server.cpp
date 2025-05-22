@@ -121,11 +121,23 @@ bool Server::pushNewClient()
 	newClient.revents = 0;
 	_pollfds.push_back(newClient);
 	
-	//_unauthedBuffers[clientfd] = "";
-	
 	_clients.insert(std::make_pair<int, Client *>(clientfd, new Client(clientfd)));
 	
 	return true;
+}
+
+bool Server::getLineFromRingBuffer(Client *client, std::string &line)
+{
+	char c;
+	line.clear();
+	while (client->getRingBuffer().getElem(c))
+	{
+		if (c == '\n')
+			break ;
+		if (c != '\r')
+			line += c;
+	}
+	return (!line.empty());
 }
 
 bool Server::processClientInput(size_t index)
@@ -154,14 +166,17 @@ bool Server::processClientInput(size_t index)
 		return false;
 	}
 	
-	//tempBuffer[readout] = '\0';
-	//std::cout << "Message from fd " << clientfd << ": " << buffer << std::endl;
-	
 	Client* client = _clients[clientfd];
 	
 	for (ssize_t i= 0; i < readout; i++)
 	{
 		client->addInputToRingBuffer(tempBuffer[i]);
+	}
+	
+	std::string line;
+	while (getLineFromRingBuffer(client, line))
+	{
+		std::cout << "Message received from client " << clientfd << ": " << line << std::endl;
 	}
 	
 	return true;
