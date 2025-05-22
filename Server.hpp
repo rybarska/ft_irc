@@ -25,6 +25,7 @@
 #include <poll.h>
 #include <vector>
 #include <map>
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "Client.hpp"
@@ -49,7 +50,7 @@ class Server
 		
 		std::vector<struct pollfd> _pollfds;
 		
-		std::map<int, Client> clients;
+		std::map<int, Client*> _clients;
 		
 		bool configAddrInfo();
 		

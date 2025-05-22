@@ -121,18 +121,22 @@ bool Server::pushNewClient()
 	newClient.revents = 0;
 	_pollfds.push_back(newClient);
 	
+	//_unauthedBuffers[clientfd] = "";
+	
+	_clients.insert(std::make_pair<int, Client *>(clientfd, new Client(clientfd)));
+	
 	return true;
 }
 
 bool Server::processClientInput(size_t index)
 {
 	int clientfd = _pollfds[index].fd;
-	char buffer[1024];
-	int bufLen = sizeof(buffer) - 1;
+	char tempBuffer[1024];
+	int bufLen = sizeof(tempBuffer) - 1;
 	int flags = 0;
 	
 	// readout comes in bytes
-	ssize_t readout = recv(clientfd, buffer, bufLen, flags);
+	ssize_t readout = recv(clientfd, tempBuffer, bufLen, flags);
 	if (readout <= 0)
 	{
 		if (readout == 0)
@@ -145,14 +149,22 @@ bool Server::processClientInput(size_t index)
 		}
 		close (clientfd);
 		_pollfds.erase(_pollfds.begin() + index);
+		delete _clients[clientfd];
+		_clients.erase(clientfd);
 		return false;
 	}
-	else
+	
+	//tempBuffer[readout] = '\0';
+	//std::cout << "Message from fd " << clientfd << ": " << buffer << std::endl;
+	
+	Client* client = _clients[clientfd];
+	
+	for (ssize_t i= 0; i < readout; i++)
 	{
-		buffer[readout] = '\0';
-		std::cout << "Message from fd " << clientfd << ": " << buffer << std::endl;
-		return true;
+		client->addInputToRingBuffer(tempBuffer[i]);
 	}
+	
+	return true;
 }
 
 void Server::pollEvents()

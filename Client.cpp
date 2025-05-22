@@ -12,8 +12,8 @@
 
 #include "Client.hpp"
 
-Client::Client(int fd, const std::string &password)
-: _clientfd(fd), _password(password), _nickname(""), _username(""), _buffer("")
+Client::Client(int fd)
+: _clientfd(fd), _clientPassword(""), _nickname(""), _username(""), _registered(false)
 {}
 
 Client::~Client()
@@ -26,7 +26,7 @@ int Client::getFd() const
 
 std::string const &Client::getPassword() const
 {
-	return _password;
+	return _clientPassword;
 }
 
 std::string const &Client::getNickname() const
@@ -39,11 +39,6 @@ std::string const &Client::getUsername() const
 	return _username;
 }
 
-std::string const &Client::getBuffer() const
-{
-	return _buffer;
-}
-
 void Client::setNickname(const std::string &nickname)
 {
 	_nickname = nickname;
@@ -52,4 +47,21 @@ void Client::setNickname(const std::string &nickname)
 void Client::setUsername(const std::string &username)
 {
 	_username = username;
+}
+
+void Client::addInputToRingBuffer(char c)
+{
+	_ringbuffer.addElem(c);
+}
+
+void Client::clearRingBuffer()
+{
+	_ringbuffer.clearBuffer();
+}
+
+bool Client::isAuthed()
+{
+	if (!_registered || _nickname.empty() || _username.empty())
+		return false;
+	return true;
 }

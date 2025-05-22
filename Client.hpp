@@ -14,11 +14,12 @@
 #define CLIENT_HPP
 
 #include <iostream>
+#include "RingBuffer.hpp"
 
 class Client
 {
 	public:
-		Client(int fd, const std::string &password);
+		Client(int fd);
 		
 		~Client();
 		
@@ -26,17 +27,23 @@ class Client
 		std::string const &getPassword() const;
 		std::string const &getNickname() const;
 		std::string const &getUsername() const;
-		std::string const &getBuffer() const;
 		
 		void setNickname(const std::string &nickname);
 		void setUsername(const std::string &username);
 		
+		void addInputToRingBuffer(char c);
+		void clearRingBuffer();
+		
+		bool isAuthed();
+		
 	private:
 		int _clientfd;
-		std::string _password;
+		std::string _clientPassword;
 		std::string _nickname;
 		std::string _username;
-		std::string _buffer;
+		bool _registered;
+		
+		RingBuffer<char, 1024> _ringbuffer;
 		
 		Client();
 		Client(const Client &source);
