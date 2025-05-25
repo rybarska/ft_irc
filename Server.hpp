@@ -62,6 +62,8 @@ class Server
 		
 		bool getLineFromRingBuffer(Client *client, std::string &line);
 		
+		CommandControl _cmdControl;
+		
 		//bool attemptAuth(Client *client);
 		
 		Server();

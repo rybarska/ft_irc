@@ -13,7 +13,7 @@
 #include "Server.hpp"
 
 Server::Server(int port, const std::string &password)
-: _sockfd(-1), _port(port), _password(password), _servinfo(NULL)
+: _sockfd(-1), _port(port), _password(password), _servinfo(NULL), _cmdControl()
 {
 	if (!configAddrInfo())
 		throw std::runtime_error("Could not set addrinfo");
@@ -177,14 +177,18 @@ bool Server::processClientInput(size_t index)
 	Message msg;
 	while (getLineFromRingBuffer(client, line))
 	{
-		std::cout << "Message received from client " << clientfd << ": " << line << std::endl;
+		//std::cout << "Message received from client " << clientfd << ": " << line << std::endl;
+		
 		msg.parseMessage(line);
-		std::cout << "Parsed Message: " << std::endl;
-		std::cout << "prefix: " << msg.getPrefix() << std::endl;
-		std::cout << "command: " << msg.getCommand() << std::endl;
-		for (size_t i=0; i < msg.getParams().size(); i++)
-			std::cout << "param " << i << " : " << msg.getParams()[i] << std::endl;
-		std::cout << "trailing: " << msg.getTrailing() << std::endl;
+		
+		//std::cout << "Parsed Message: " << std::endl;
+		//std::cout << "prefix: " << msg.getPrefix() << std::endl;
+		//std::cout << "command: " << msg.getCommand() << std::endl;
+		//for (size_t i=0; i < msg.getParams().size(); i++)
+		//	std::cout << "param " << i << " : " << msg.getParams()[i] << std::endl;
+		//std::cout << "trailing: " << msg.getTrailing() << std::endl;
+		
+		_cmdControl.processCommand(*client, msg);
 	}
 	
 	return true;
