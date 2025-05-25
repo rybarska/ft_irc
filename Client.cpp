@@ -13,7 +13,9 @@
 #include "Client.hpp"
 
 Client::Client(int fd)
-: _clientfd(fd), _clientPassword(""), _nickname(""), _username(""), _registered(false)
+: _hasPass(false), _hasNick(false), _hasUser(false),
+_clientfd(fd), _clientPassword(""), _nickname(""), _username(""),
+_authed(false), _registered(false)
 {}
 
 Client::~Client()
@@ -44,6 +46,11 @@ RingBuffer<char, 1024> &Client::getRingBuffer()
 	return _ringbuffer;
 }
 
+void Client::setPassword(const std::string &password)
+{
+	_clientPassword = password;
+}
+
 void Client::setNickname(const std::string &nickname)
 {
 	_nickname = nickname;
@@ -52,6 +59,16 @@ void Client::setNickname(const std::string &nickname)
 void Client::setUsername(const std::string &username)
 {
 	_username = username;
+}
+
+void Client::setAuthed()
+{
+	_authed = true;
+}
+
+void Client::setRegistered()
+{
+	_registered = true;
 }
 
 void Client::addInputToRingBuffer(char c)
@@ -66,7 +83,14 @@ void Client::clearRingBuffer()
 
 bool Client::isAuthed()
 {
-	if (!_registered || _nickname.empty() || _username.empty())
+	if (!_authed)
+		return false;
+	return true;
+}
+
+bool Client::isRegistered()
+{
+	if (!_registered)
 		return false;
 	return true;
 }

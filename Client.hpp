@@ -29,13 +29,17 @@ class Client
 		std::string const &getUsername() const;
 		RingBuffer<char, 1024> &getRingBuffer();
 		
+		void setPassword(const std::string &password);
 		void setNickname(const std::string &nickname);
 		void setUsername(const std::string &username);
+		void setAuthed();
+		void setRegistered();
 		
 		void addInputToRingBuffer(char c);
 		void clearRingBuffer();
 		
 		bool isAuthed();
+		bool isRegistered();
 		
 		bool _hasPass;
 		bool _hasNick;
@@ -46,6 +50,7 @@ class Client
 		std::string _clientPassword;
 		std::string _nickname;
 		std::string _username;
+		bool _authed;
 		bool _registered;
 		
 		RingBuffer<char, 1024> _ringbuffer;

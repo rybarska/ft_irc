@@ -189,6 +189,10 @@ bool Server::processClientInput(size_t index)
 		//std::cout << "trailing: " << msg.getTrailing() << std::endl;
 		
 		_cmdControl.processCommand(*client, msg);
+		
+		attemptAuth(client);
+		
+		attemptRegistration(client);
 	}
 	
 	return true;
@@ -237,30 +241,55 @@ void Server::pollEvents()
 	}
 }
 
-/*bool Server::attemptAuth(Client *client)
+bool Server::attemptAuth(Client *client)
 {
-	if (client._registered)
+	if (client->isRegistered())
 	{
 		std::cout << "Client already authenticated" << std::endl;
 		return false;
 	}
 	
-	if (!client._hasPass || !client._hasNick || !client._hasUser)
+	if (!client->_hasPass)
+	{
+		std::cout << "Cannot authenticate yet, missing password" << std::endl;
+		return false;
+	}
+	
+	if (client->getPassword() != _password)
+	{
+		std::cerr << "Error (wrong password)" << std::endl;
+		// TODO: send error message
+		return false;
+	}
+	
+	client->setAuthed();
+	
+	//TODO send a welcome message
+	
+	return true;
+}
+
+bool Server::attemptRegistration(Client *client)
+{
+	
+	if (client->isRegistered())
+	{
+		std::cout << "Client already authenticated" << std::endl;
+		return false;
+	}
+	
+	if (!client->isAuthed() || !client->_hasNick || !client->_hasUser)
 	{
 		std::cout << "Cannot authenticate yet, missing info" << std::endl;
 		return false;
 	}
 	
-	if (client.getPassword() != _password)
-	{
-		std::cerr << "Error (wrong password)" << std::endl;
-		return false;
-	}
+	client->setRegistered();
 	
-	client._registered = true;
+	std::cout << "Fireworks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1" << std::endl;
 	
 	return true;
-}*/
+}
 
 bool Server::getGoing()
 {

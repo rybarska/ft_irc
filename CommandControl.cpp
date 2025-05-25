@@ -46,7 +46,13 @@ void CommandControl::processPass(Client &client, const Message &msg)
 	if (!msg.getParams().empty())
 		client._hasPass = true;
 	//else
+	//{
 		// TODO: send error to client
+	//}
+	
+	client.setPassword(msg.getParams()[0]);
+	
+	client._hasPass = true;
 }
 
 void CommandControl::processNick(Client &client, const Message &msg)

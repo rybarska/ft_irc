@@ -64,7 +64,8 @@ class Server
 		
 		CommandControl _cmdControl;
 		
-		//bool attemptAuth(Client *client);
+		bool attemptAuth(Client *client);
+		bool attemptRegistration(Client *client);
 		
 		Server();
 		Server(const Server &source);
