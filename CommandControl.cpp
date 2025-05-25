@@ -38,8 +38,11 @@ void CommandControl::processCommand(Client &client, const Message &msg)
 
 void CommandControl::processPass(Client &client, const Message &msg)
 {
-	//if client.isAuthed()
+	if (client.isAuthed())
+	{
 		// TODO: send error to client
+		return ;
+	}
 	if (!msg.getParams().empty())
 		client._hasPass = true;
 	//else
