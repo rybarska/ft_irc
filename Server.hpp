@@ -29,6 +29,7 @@
 #include <arpa/inet.h>
 #include "Client.hpp"
 #include "Message.hpp"
+#include "CommandControl.hpp"
 
 #define BACKLOG 10 // number of pending connections that the queue will hold
 

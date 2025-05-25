@@ -37,14 +37,15 @@ class Client
 		
 		bool isAuthed();
 		
+		bool _hasPass;
+		bool _hasNick;
+		bool _hasUser;
+		
 	private:
 		int _clientfd;
 		std::string _clientPassword;
 		std::string _nickname;
 		std::string _username;
-		bool _hasPass;
-		bool _hasNick;
-		bool _hasUser;
 		bool _registered;
 		
 		RingBuffer<char, 1024> _ringbuffer;
