@@ -174,9 +174,17 @@ bool Server::processClientInput(size_t index)
 	}
 	
 	std::string line;
+	Message msg;
 	while (getLineFromRingBuffer(client, line))
 	{
 		std::cout << "Message received from client " << clientfd << ": " << line << std::endl;
+		msg.parseMessage(line);
+		std::cout << "Parsed Message: " << std::endl;
+		std::cout << "prefix: " << msg.getPrefix() << std::endl;
+		std::cout << "command: " << msg.getCommand() << std::endl;
+		for (size_t i=0; i < msg.getParams().size(); i++)
+			std::cout << "param " << i << " : " << msg.getParams()[i] << std::endl;
+		std::cout << "trailing: " << msg.getTrailing() << std::endl;
 	}
 	
 	return true;
@@ -224,6 +232,31 @@ void Server::pollEvents()
 		}
 	}
 }
+
+/*bool Server::attemptAuth(Client *client)
+{
+	if (client._registered)
+	{
+		std::cout << "Client already authenticated" << std::endl;
+		return false;
+	}
+	
+	if (!client._hasPass || !client._hasNick || !client._hasUser)
+	{
+		std::cout << "Cannot authenticate yet, missing info" << std::endl;
+		return false;
+	}
+	
+	if (client.getPassword() != _password)
+	{
+		std::cerr << "Error (wrong password)" << std::endl;
+		return false;
+	}
+	
+	client._registered = true;
+	
+	return true;
+}*/
 
 bool Server::getGoing()
 {

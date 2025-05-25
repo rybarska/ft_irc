@@ -25,10 +25,10 @@
 #include <poll.h>
 #include <vector>
 #include <map>
-
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "Client.hpp"
+#include "Message.hpp"
 
 #define BACKLOG 10 // number of pending connections that the queue will hold
 
@@ -60,6 +60,8 @@ class Server
 		bool processClientInput(size_t index);
 		
 		bool getLineFromRingBuffer(Client *client, std::string &line);
+		
+		//bool attemptAuth(Client *client);
 		
 		Server();
 		Server(const Server &source);

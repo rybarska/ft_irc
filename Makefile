@@ -1,6 +1,7 @@
 SRC = ./main.cpp \
       ./Server.cpp \
       ./Client.cpp \
+      ./Message.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 CXX = c++
