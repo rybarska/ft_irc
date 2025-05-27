@@ -33,6 +33,8 @@
 
 #define BACKLOG 10 // number of pending connections that the queue will hold
 
+extern volatile __sig_atomic_t g_oOn;
+
 class Server
 {
 	public:
@@ -41,6 +43,8 @@ class Server
 		~Server();
 		
 		bool getGoing();
+		
+		void cleanup();
 	private:
 		int _sockfd;
 		int _port;

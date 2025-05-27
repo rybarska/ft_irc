@@ -25,14 +25,7 @@ Server::Server(int port, const std::string &password)
 
 Server::~Server()
 {
-	if (_servinfo)
-		freeaddrinfo(_servinfo);
-	if (_sockfd != -1)
-	{
-		close(_sockfd);
-		std::cout << "Socket closed" << std::endl;
-	}
-	std::cout << "Server shutting down" << std::endl;
+	cleanup();
 }
 
 bool Server::configAddrInfo()
@@ -235,7 +228,7 @@ void Server::pollEvents()
 	pfd.revents = 0;
 	_pollfds.push_back(pfd);
 	
-	while (true)
+	while (g_oOn)
 	{
 		if (_pollfds.empty())
 			continue ;
@@ -317,6 +310,38 @@ bool Server::attemptRegistration(Client *client)
 	//TODO send proper IRC welcome message (RPL_WELCOME 001) and other numeric replies (002-004)
 	
 	return true;
+}
+
+void Server::cleanup()
+{
+	for (std::vector<struct pollfd>::iterator it = _pollfds.begin(); it != _pollfds.end(); ++it)
+	{
+		if (it->fd != _sockfd && it->fd != -1)
+		{
+			close(it->fd);
+			it->fd = -1;
+		}
+	}
+	_pollfds.clear();
+	
+	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		delete it->second;
+	}
+	_clients.clear();
+	
+	if (_servinfo)
+	{
+		freeaddrinfo(_servinfo);
+		_servinfo = NULL;
+	}
+	if (_sockfd != -1)
+	{
+		close(_sockfd);
+		_sockfd = -1;
+		std::cout << "Server socket closed" << std::endl;
+	}
+	std::cout << "Server shutting down" << std::endl;
 }
 
 bool Server::getGoing()

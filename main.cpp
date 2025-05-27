@@ -10,13 +10,25 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <csignal>
 #include "Server.hpp"
 #include "commandLineUtils.cpp"
 
 //TODO: might want to add error or log system instead of std::cerr / std::cout
 
+volatile sig_atomic_t g_oOn = 1;
+
+void	handle_sig(int sig)
+{
+	(void) sig;
+	g_oOn = 0;
+	std::cout << "Server shutdown started" << std::endl;
+}
+
 int main(int argc, char **argv)
 {	
+	signal(SIGINT, handle_sig);
+	
 	try
 	{
 		int port;
