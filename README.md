@@ -34,6 +34,8 @@ Command dispatch via _cmdControl.processCommand().
 
 Authentication hooks: attemptAuth() and attemptRegistration() stubs are in place.
 
+Basic cleanup on signal.
+
 
 🤔️  WHAT STILL NEEDS TO BE DONE
 
@@ -42,10 +44,6 @@ User & channel state management: Implement structures and logic for managing nic
 Full command support: Only partial or no handling for standard IRC commands (JOIN, PRIVMSG, NICK, etc.).
 
 Authentication enforcement: Actually check passwords and reject invalid login attempts.
-
-Graceful shutdown:
-
-Handle SIGINT or similar signals to cleanly close connections and free memory.
 
 Send QUIT or ERROR messages to clients before disconnecting.
 
