@@ -277,8 +277,7 @@ bool Server::attemptAuth(Client *client)
 	
 	client->setAuthed();
 	
-	//TODO send proper IRC welcome message (RPL_WELCOME 001) and other numeric replies (002-004)
-	//TODO: Confirm that the server is compliant with the RFC welcome sequence
+	//TODO consider sending ERR_PASSWDMISMATCH(464) here if password fails
 	
 	return true;
 }
@@ -297,7 +296,9 @@ bool Server::attemptRegistration(Client *client)
 	client->setRegistered();
 	
 	if (client->isRegistered())
-		std::cout << "Fireworks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1" << std::endl;
+		std::cout << "Registered!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+		
+	//TODO send proper IRC welcome message (RPL_WELCOME 001) and other numeric replies (002-004)
 	
 	return true;
 }
