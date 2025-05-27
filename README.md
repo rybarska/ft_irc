@@ -2,7 +2,8 @@
 
 Reference: the newest version of the "Beej's Guide to Network Programming", https://beej.us/guide/bgnet/pdf/bgnet_a4_c_1.pdf
 
-How you can test it at the moment:
+🧐️  HOW YOU CAN TEST IT AT THE MOMENT:
+
 * Terminal 1:
 ```bash
 make
