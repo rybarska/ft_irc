@@ -2,6 +2,20 @@
 
 Reference: the newest version of the "Beej's Guide to Network Programming", https://beej.us/guide/bgnet/pdf/bgnet_a4_c_1.pdf
 
+How you can test it at the moment:
+* Terminal 1:
+```bash
+make
+./ircserv <port> <password>
+```
+* Terminal 2 (or more):
+```bash
+telnet localhost <port>
+PASS <password>
+NICK nick
+USER user
+```
+
 😁️  WHAT’S IMPLEMENTED
 
 Command-line parsing with argument validation (<port> <password>).
