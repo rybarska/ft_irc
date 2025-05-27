@@ -16,6 +16,8 @@
 #include <iostream>
 #include <string>
 
+//TODO: handle overly long lines, e.g. exceeding 512 bytes per RFC 2812
+
 template <typename T, int N>
 class RingBuffer
 {

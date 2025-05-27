@@ -14,6 +14,8 @@
 #include <cstdlib> // for std::atoi()
 #include <sstream>
 
+//TODO: might want to add error or log system instead of std::cerr / std::cout
+
 bool isOnlyWhitespace(int argc, char **argv)
 {
 	for (int i = 1; i < argc; ++i)
@@ -41,7 +43,7 @@ bool parseCommandLineArgs(int argc, char **argv, int &port, std::string &passwor
 	}
 	
 	password = argv[2];
-	if (password.length() < 6 || password.length() > 64)
+	if (!iss.eof() || iss.fail() || password.length() < 6 || password.length() > 64)
 	{
 		std::cerr << "Error: password length must be between 6 and 64" << std::endl;
 		return (false);

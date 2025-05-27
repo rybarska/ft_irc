@@ -13,13 +13,16 @@
 #include "CommandControl.hpp"
 #include "Client.hpp"
 
+//TODO: implement full IRC registration flow, including NICK and USER validation.
+//TODO: implement command routing for JOIN, PRIVMSG, PART, QUIT, MODE, TOPIC etc.
+
 CommandControl::CommandControl()
 {
 	_controls["PASS"] = &CommandControl::processPass;
 	_controls["NICK"] = &CommandControl::processNick;
 	_controls["USER"] = &CommandControl::processUser;
 	_controls["JOIN"] = &CommandControl::processJoin;
-	_controls["PRIV"] = &CommandControl::processPriv;
+	_controls["PRIVMSG"] = &CommandControl::processPriv;
 }
 		
 CommandControl::~CommandControl(){}
@@ -83,7 +86,7 @@ void CommandControl::processUser(Client &client, const Message &msg)
 
 void CommandControl::processJoin(Client &client, const Message &msg)
 {
-	(void) client; //might need it later
+	(void) client; //will need it later
 	std::cout << "JOIN: ";
 	if (msg.getParams().empty())
 		std::cout << "(none)" << std::endl;
@@ -96,7 +99,7 @@ void CommandControl::processJoin(Client &client, const Message &msg)
 
 void CommandControl::processPriv(Client &client, const Message &msg)
 {
-	(void) client; //might need it later
+	(void) client; //will need it later
 	std::cout << "PRIV: ";
 	if (msg.getParams().empty())
 		std::cout << "(none)" << std::endl;

@@ -12,6 +12,10 @@
 
 #include "Server.hpp"
 
+//TODO: initialise all necessary server state for user/channel management
+//TODO: gracefully disconnect all clients before shutdown
+//TODO: deallocate any added memory / resources
+
 Server::Server(int port, const std::string &password)
 : _sockfd(-1), _port(port), _password(password), _servinfo(NULL), _cmdControl()
 {
@@ -123,6 +127,8 @@ bool Server::pushNewClient()
 	
 	_clients.insert(std::make_pair<int, Client *>(clientfd, new Client(clientfd)));
 	
+	//TODO: Consider prompting for password
+	
 	return true;
 }
 
@@ -142,6 +148,10 @@ bool Server::getLineFromRingBuffer(Client *client, std::string &line)
 
 bool Server::processClientInput(size_t index)
 {
+//TODO: sanitize input for protocol compliance, e.g. max 512 bytes per RFC 2812
+//TODO: implement rate-limiting or anti-flood protection if necessary
+//TODO: handle errors for _cmdControl.processCommand more gracefully
+	
 	int clientfd = _pollfds[index].fd;
 	char tempBuffer[1024];
 	int bufLen = sizeof(tempBuffer) - 1;
@@ -199,7 +209,10 @@ bool Server::processClientInput(size_t index)
 }
 
 void Server::pollEvents()
-{	
+{
+//TODO: use timeout or explicitly detect and clean up disconnected or idle clients
+//TODO: Add signal handling for graceful shutdown, e.g. SIGINT
+
 	struct pollfd pfd;
 	pfd.fd = _sockfd;
 	pfd.events = POLLIN;
@@ -212,7 +225,6 @@ void Server::pollEvents()
 			continue ;
 		
 		int eventCount = poll(_pollfds.data(), _pollfds.size(), -1);
-		//int eventCount = poll(_pollfds.data(), 1, -1);
 		
 		if (eventCount == -1)
 		{
@@ -243,11 +255,12 @@ void Server::pollEvents()
 
 bool Server::attemptAuth(Client *client)
 {
+//TODO: Send proper IRC ERR_PASSWDMISMATCH (464) if incorrect password
+//TODO: Possibly disconnect clients afer failed auth attempts
+//TODO: Add limit to number of auth attempts
+
 	if (client->isRegistered())
-	{
-		std::cout << "Client already authenticated" << std::endl;
 		return false;
-	}
 	
 	if (!client->_hasPass)
 	{
@@ -264,29 +277,27 @@ bool Server::attemptAuth(Client *client)
 	
 	client->setAuthed();
 	
-	//TODO send a welcome message
+	//TODO send proper IRC welcome message (RPL_WELCOME 001) and other numeric replies (002-004)
+	//TODO: Confirm that the server is compliant with the RFC welcome sequence
 	
 	return true;
 }
 
 bool Server::attemptRegistration(Client *client)
 {
-	
 	if (client->isRegistered())
-	{
-		std::cout << "Client already authenticated" << std::endl;
 		return false;
-	}
 	
 	if (!client->isAuthed() || !client->_hasNick || !client->_hasUser)
 	{
-		std::cout << "Cannot authenticate yet, missing info" << std::endl;
+		std::cout << "Cannot register yet, missing info" << std::endl;
 		return false;
 	}
 	
 	client->setRegistered();
 	
-	std::cout << "Fireworks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1" << std::endl;
+	if (client->isRegistered())
+		std::cout << "Fireworks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1" << std::endl;
 	
 	return true;
 }
