@@ -134,14 +134,30 @@ bool Server::pushNewClient()
 
 bool Server::getLineFromRingBuffer(Client *client, std::string &line)
 {
+	const size_t MAX_LEN = 512; // per RFC 2812, includes \r\n
+	
 	char c;
 	line.clear();
+	size_t len = 0;
+	bool overflow = false;
+	
 	while (client->getRingBuffer().getElem(c))
 	{
 		if (c == '\n')
 			break ;
-		if (c != '\r')
+		if (len >= MAX_LEN - 2) // 2 for \r\n
+			overflow = true;
+		if (!overflow && c != '\r')
+		{
 			line += c;
+			len++;
+		}
+	}
+	if (overflow)
+	{
+		std::cerr << "Error: line too long" << std::endl;
+		line.clear();
+		return false;
 	}
 	return (!line.empty());
 }
@@ -153,7 +169,7 @@ bool Server::processClientInput(size_t index)
 //TODO: handle errors for _cmdControl.processCommand more gracefully
 	
 	int clientfd = _pollfds[index].fd;
-	char tempBuffer[1024];
+	char tempBuffer[512];
 	int bufLen = sizeof(tempBuffer) - 1;
 	int flags = 0;
 	

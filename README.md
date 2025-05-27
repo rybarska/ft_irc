@@ -51,8 +51,6 @@ Send QUIT or ERROR messages to clients before disconnecting.
 
 Input sanitization:
 
-Limit line lengths to 512 bytes as per RFC 2812.
-
 Prevent malformed command crashes.
 
 Logging: Replace std::cout/cerr with a proper logging or debug mode.
