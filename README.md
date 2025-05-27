@@ -1,28 +1,47 @@
-Cross-cutting TODOs
+😁️  WHAT’S IMPLEMENTED
 
-TODO: Implement full IRC registration flow, including NICK and USER validation.
+Command-line parsing with argument validation (<port> <password>).
 
-TODO: Implement command routing for commands like JOIN, PRIVMSG, PART, QUIT, MODE, TOPIC, etc.
+Server socket setup using getaddrinfo(), socket(), bind(), and listen() (IPv4/IPv6-compatible).
 
-TODO: Implement channel management: create, join, part, topic, modes, user lists, etc.
+Graceful accept() of new clients, added to a pollfd array and tracked with client FDs.
 
-TODO: Implement message broadcasting to channels and users.
+Basic I/O loop using poll(), handling incoming messages and connection drops.
 
-TODO: Implement server replies (numerics) and errors properly, following the IRC RFC.
+Ring buffer input parsing per client with line-by-line processing.
 
-TODO: Validate nicknames and usernames according to the spec.
+Message parsing via the Message class.
 
-TODO: Add logging framework or verbosity levels.
+Command dispatch via _cmdControl.processCommand().
 
-TODO: Add unit tests / integration tests to cover connection handling, command parsing, etc.
+Authentication hooks: attemptAuth() and attemptRegistration() stubs are in place.
 
-TODO: Implement flood protection / ping timeout detection (to disconnect idle clients).
 
-TODO: Implement support for multiple connections with proper user tracking.
+🤔️  WHAT STILL NEEDS TO BE DONE
 
-TODO: Handle QUIT command to clean up user state and inform channels.
+User & channel state management: Implement structures and logic for managing nicknames, usernames, channels, modes, etc.
 
-TODO: Handle nickname collisions and enforce uniqueness.
+Full command support: Only partial or no handling for standard IRC commands (JOIN, PRIVMSG, NICK, etc.).
+
+Authentication enforcement: Actually check passwords and reject invalid login attempts.
+
+Graceful shutdown:
+
+Handle SIGINT or similar signals to cleanly close connections and free memory.
+
+Send QUIT or ERROR messages to clients before disconnecting.
+
+Input sanitization:
+
+Limit line lengths to 512 bytes as per RFC 2812.
+
+Prevent malformed command crashes.
+
+Logging: Replace std::cout/cerr with a proper logging or debug mode.
+
+Anti-flood/rate-limiting: Prevent clients from spamming commands.
+
+Cleanup of disconnected clients: Currently done ad hoc in processClientInput(); could be cleaner/more robust.
 
 
 ## ⚠️ Security Disclaimer
