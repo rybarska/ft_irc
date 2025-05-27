@@ -1,3 +1,7 @@
+27/05/2005: here is about 30% of the mandatory part of ft__irc.
+
+Reference: the newest version of the "Beej's Guide to Network Programming", https://beej.us/guide/bgnet/pdf/bgnet_a4_c_1.pdf
+
 😁️  WHAT’S IMPLEMENTED
 
 Command-line parsing with argument validation (<port> <password>).
