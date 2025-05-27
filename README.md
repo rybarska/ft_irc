@@ -18,7 +18,7 @@ USER user
 
 😁️  WHAT’S IMPLEMENTED
 
-Command-line parsing with argument validation (<port> <password>).
+Command-line parsing with argument validation <port> <password>.
 
 Server socket setup using getaddrinfo(), socket(), bind(), and listen() (IPv4/IPv6-compatible).
 
@@ -26,7 +26,7 @@ Graceful accept() of new clients, added to a pollfd array and tracked with clien
 
 Basic I/O loop using poll(), handling incoming messages and connection drops.
 
-Ring buffer input parsing per client with line-by-line processing.
+Ring buffer (circular buffer) input parsing per client with line-by-line processing.
 
 Message parsing via the Message class.
 
