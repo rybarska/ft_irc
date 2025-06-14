@@ -3,86 +3,82 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arybarsk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 18:23:00 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/05/23 18:23:04 by arybarsk         ###   ########.fr       */
+/*   Updated: 2025/06/14 20:04:12 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Message.hpp"
+#include <sstream>
+#include <string>
 
-Message::Message(){}
-		
-Message::~Message(){}
-
-std::string const &Message::getPrefix() const
+Message::Message() : _raw(""), _prefix(""), _command(""), _trailing("")
 {
-	return _prefix;
 }
 
-std::string const &Message::getCommand() const
+Message::~Message()
 {
-	return _command;
 }
 
-std::vector<std::string> const &Message::getParams() const
+const std::string &Message::getPrefix() const
 {
-	return _params;
+    return _prefix;
 }
 
-std::string const &Message::getTrailing() const
+const std::string &Message::getCommand() const
 {
-	return _trailing;
+    return _command;
+}
+
+const std::vector<std::string> &Message::getParams() const
+{
+    return _params;
+}
+
+const std::string &Message::getTrailing() const
+{
+    return _trailing;
+}
+
+const std::string &Message::getRawMessage() const
+{
+    return _raw;
 }
 
 void Message::parseMessage(std::string const &msg)
 {
-	_prefix.clear();
-	_command.clear();
-	_params.clear();
-	_trailing.clear();
-	
-	size_t ending = msg.find_last_not_of("\n\r");
-	if (ending == std::string::npos)
-		return ;
-	
-	const std::string line = msg.substr(0, ending + 1);
-	
-	size_t pos = 0;
-	size_t next;
-	
-	if (line[pos] == ':')
-	{
-		next = line.find(' ', pos);
-		if (next == std::string::npos)
-			return ;
-		_prefix = line.substr(pos + 1, next - pos - 1);
-		pos = next + 1;
-	}
-	
-	next = line.find(' ');
-	_command = line.substr(pos, next - pos);
-	if (_command.empty())
-		return ;
-	
-	if (next == std::string::npos)
-		pos = line.size();
-	else
-		pos = next + 1;
-	
-	while (pos < line.size())
-	{
-		if (line[pos] == ':')
-		{
-			_trailing = line.substr(pos + 1);
-			break ;
-		}
-		next = line.find(' ', pos);	
-		_params.push_back(line.substr(pos, next - pos));
-		if (next == std::string::npos)
-			break ;
-		pos = next + 1;
-	}
-	
+    _raw = msg; // store the entire raw input
+
+    std::istringstream iss(msg);
+    // if the message starts with ':' then the first token is the prefix
+    if (!msg.empty() && msg[0] == ':')
+    {
+        iss >> _prefix;
+        // remove the leading ':'
+        if (!_prefix.empty())
+            _prefix = _prefix.substr(1);
+    }
+    iss >> _command;
+    
+    _params.clear();
+    _trailing.clear();
+    std::string token;
+    while (iss >> token)
+    {
+        if (token[0] == ':')
+        {
+            // Everything after ':' is the trailing text
+            _trailing = token.substr(1);
+            std::string rest;
+            getline(iss, rest);
+            _trailing += rest;
+            break;
+        }
+        else
+        {
+            _params.push_back(token);
+        }
+    }
 }

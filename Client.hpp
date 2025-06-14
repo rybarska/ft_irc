@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arybarsk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:14:09 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/05/20 15:14:13 by arybarsk         ###   ########.fr       */
+/*   Updated: 2025/06/14 19:12:54 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,9 @@ class Client
 		bool _hasPass;
 		bool _hasNick;
 		bool _hasUser;
+
+		void sendMessage(const std::string &msg);
+		
 		
 	private:
 		int _clientfd;

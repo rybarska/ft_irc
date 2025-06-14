@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arybarsk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 18:22:49 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/05/23 18:22:55 by arybarsk         ###   ########.fr       */
+/*   Updated: 2025/06/14 20:03:33 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,25 +19,27 @@
 
 class Message
 {
-	public:
-		Message();
-		~Message();
-		
-		std::string const &getPrefix() const;
-		std::string const &getCommand() const;
-		std::vector<std::string> const &getParams() const;
-		std::string const &getTrailing() const;
-		
-		void parseMessage(std::string const &msg);
-		
-	private:
-		std::string _prefix;
-		std::string _command;
-		std::vector<std::string> _params;
-		std::string _trailing;
-		
-		Message(const Message &source);
-		Message & operator = (const Message &source);
+    public:
+        Message();
+        ~Message();
+        
+        std::string const &getPrefix() const;
+        std::string const &getCommand() const;
+        std::vector<std::string> const &getParams() const;
+        std::string const &getTrailing() const;
+        
+        void parseMessage(std::string const &msg);
+        const std::string &getRawMessage() const;
+        
+    private:
+        std::string _raw; // <-- Added to store the entire raw input
+        std::string _prefix;
+        std::string _command;
+        std::vector<std::string> _params;
+        std::string _trailing;
+        
+        Message(const Message &source);
+        Message & operator = (const Message &source);
 };
 
 #endif

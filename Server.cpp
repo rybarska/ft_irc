@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arybarsk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 20:59:06 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/05/16 20:59:08 by arybarsk         ###   ########.fr       */
+/*   Updated: 2025/06/14 19:33:49 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
+Server *g_serverInstance = NULL;
 //TODO: initialise all necessary server state for user/channel management
 //TODO: gracefully disconnect all clients before shutdown
 //TODO: deallocate any added memory / resources
@@ -196,16 +197,16 @@ bool Server::processClientInput(size_t index)
 	Message msg;
 	while (getLineFromRingBuffer(client, line))
 	{
-		//std::cout << "Message received from client " << clientfd << ": " << line << std::endl;
+		std::cout << "Message received from client " << clientfd << ": " << line << std::endl;
 		
 		msg.parseMessage(line);
 		
-		//std::cout << "Parsed Message: " << std::endl;
-		//std::cout << "prefix: " << msg.getPrefix() << std::endl;
-		//std::cout << "command: " << msg.getCommand() << std::endl;
-		//for (size_t i=0; i < msg.getParams().size(); i++)
-		//	std::cout << "param " << i << " : " << msg.getParams()[i] << std::endl;
-		//std::cout << "trailing: " << msg.getTrailing() << std::endl;
+		std::cout << "Parsed Message: " << std::endl;
+		std::cout << "prefix: " << msg.getPrefix() << std::endl;
+		std::cout << "command: " << msg.getCommand() << std::endl;
+		for (size_t i=0; i < msg.getParams().size(); i++)
+			std::cout << "param " << i << " : " << msg.getParams()[i] << std::endl;
+		std::cout << "trailing: " << msg.getTrailing() << std::endl;
 		
 		_cmdControl.processCommand(*client, msg);
 		
@@ -329,6 +330,12 @@ void Server::cleanup()
 		delete it->second;
 	}
 	_clients.clear();
+
+	for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        delete it->second;
+    }
+    _channels.clear();
 	
 	if (_servinfo)
 	{
@@ -348,9 +355,31 @@ bool Server::getGoing()
 {
 	if (!setListeningSocket())
 		throw std::runtime_error("Could not set socket");
-	
+	g_serverInstance = this; // set the global pointer
 	pollEvents();
 	
 	return true;
 }
 
+Channel* Server::getOrCreateChannel(const std::string &name)
+{
+    std::map<std::string, Channel*>::iterator it = _channels.find(name);
+    if (it != _channels.end())
+        return it->second;
+    
+    Channel* newChannel = new Channel(name);
+    _channels[name] = newChannel;
+    std::cout << "Created new channel: " << name << std::endl;
+    return newChannel;
+}
+
+std::vector<Channel*> Server::getChannelsForClient(Client *client)
+{
+    std::vector<Channel*> clientChannels;
+    for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        if (it->second->hasClient(client))
+            clientChannels.push_back(it->second);
+    }
+    return clientChannels;
+}

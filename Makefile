@@ -3,6 +3,7 @@ SRC = ./main.cpp \
       ./Client.cpp \
       ./Message.cpp \
       ./CommandControl.cpp \
+	  ./Channel.cpp
 
 OBJ = $(SRC:.cpp=.o)
 CXX = c++

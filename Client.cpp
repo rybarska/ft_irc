@@ -3,14 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arybarsk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:14:18 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/05/20 15:14:21 by arybarsk         ###   ########.fr       */
+/*   Updated: 2025/06/14 19:13:29 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include <sys/socket.h>
+#include <cerrno>
+#include <cstring>
 
 Client::Client(int fd)
 : _hasPass(false), _hasNick(false), _hasUser(false),
@@ -93,4 +96,13 @@ bool Client::isRegistered()
 	if (!_registered)
 		return false;
 	return true;
+}
+
+void Client::sendMessage(const std::string &msg)
+{
+    if (send(_clientfd, msg.c_str(), msg.size(), 0) == -1)
+    {
+        std::cerr << "Error sending message to fd " << _clientfd 
+                  << ": " << std::strerror(errno) << std::endl;
+    }
 }

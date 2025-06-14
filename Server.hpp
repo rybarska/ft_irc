@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arybarsk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 20:59:19 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/05/16 20:59:22 by arybarsk         ###   ########.fr       */
+/*   Updated: 2025/06/14 19:32:45 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@
 #include "Client.hpp"
 #include "Message.hpp"
 #include "CommandControl.hpp"
+#include "Channel.hpp"
 
 #define BACKLOG 10 // number of pending connections that the queue will hold
 
@@ -45,6 +46,8 @@ class Server
 		bool getGoing();
 		
 		void cleanup();
+		Channel* getOrCreateChannel(const std::string &name);
+		std::vector<Channel*> getChannelsForClient(Client *client);
 	private:
 		int _sockfd;
 		int _port;
@@ -56,6 +59,7 @@ class Server
 		std::vector<struct pollfd> _pollfds;
 		
 		std::map<int, Client*> _clients;
+		std::map<std::string, Channel*> _channels;
 		
 		bool configAddrInfo();
 		

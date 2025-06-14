@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandControl.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arybarsk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:14:35 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/05/25 16:14:39 by arybarsk         ###   ########.fr       */
+/*   Updated: 2025/06/14 19:36:20 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class CommandControl
 		void processJoin(Client &client, const Message &msg);
 		void processPriv(Client &client, const Message &msg);
 		void processUnknown(Client &client, const Message &msg);
+		void processGeneralMessage(Client &client, const Message &msg);
 		
 		CommandControl(const CommandControl &source);
 		CommandControl & operator = (const CommandControl &source);
