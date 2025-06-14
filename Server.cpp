@@ -306,7 +306,11 @@ bool Server::attemptRegistration(Client *client)
 	client->setRegistered();
 	
 	if (client->isRegistered())
+	{
 		std::cout << "Registered!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+		
+		client->sendMsgToClient("Tadaaaaaaa!!!!!!!!!!!!!!!!");
+	}
 		
 	//TODO send proper IRC welcome message (RPL_WELCOME 001) and other numeric replies (002-004)
 	

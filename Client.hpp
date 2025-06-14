@@ -14,6 +14,8 @@
 #define CLIENT_HPP
 
 #include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "RingBuffer.hpp"
 
 class Client
@@ -40,6 +42,8 @@ class Client
 		
 		bool isAuthed();
 		bool isRegistered();
+		
+		bool sendMsgToClient(std::string const &msg);
 		
 		bool _hasPass;
 		bool _hasNick;

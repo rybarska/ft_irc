@@ -6,7 +6,7 @@
 /*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:14:18 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/06/14 19:13:29 by ibaranov         ###   ########.fr       */
+/*   Updated: 2025/06/14 21:19:43 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,14 @@ bool Client::isAuthed()
 bool Client::isRegistered()
 {
 	if (!_registered)
+		return false;
+	return true;
+}
+
+bool Client::sendMsgToClient(std::string const &msg)
+{
+	std::string formattedMsg = msg + "\r\n";
+	if (send(_clientfd, formattedMsg.c_str(), formattedMsg.size(), 0) == -1)
 		return false;
 	return true;
 }
