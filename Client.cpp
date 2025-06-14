@@ -94,3 +94,11 @@ bool Client::isRegistered()
 		return false;
 	return true;
 }
+
+bool Client::sendMsgToClient(std::string const &msg)
+{
+	std::string formattedMsg = msg + "\r\n";
+	if (send(_clientfd, formattedMsg.c_str(), formattedMsg.size(), 0) == -1)
+		return false;
+	return true;
+}
