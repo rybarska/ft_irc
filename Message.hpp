@@ -32,7 +32,7 @@ class Message
         const std::string &getRawMessage() const;
         
     private:
-        std::string _raw; // <-- Added to store the entire raw input
+        std::string _raw; 
         std::string _prefix;
         std::string _command;
         std::vector<std::string> _params;

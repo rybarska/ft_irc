@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 #include <cerrno>
 #include <cstring>
+#include <vector>
 
 Client::Client(int fd)
 : _hasPass(false), _hasNick(false), _hasUser(false),
@@ -114,3 +115,4 @@ void Client::sendMessage(const std::string &msg)
                   << ": " << std::strerror(errno) << std::endl;
     }
 }
+

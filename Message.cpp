@@ -49,7 +49,7 @@ const std::string &Message::getRawMessage() const
 
 void Message::parseMessage(std::string const &msg)
 {
-    _raw = msg; // store the entire raw input
+    _raw = msg; 
 
     std::istringstream iss(msg);
     // if the message starts with ':' then the first token is the prefix
@@ -81,4 +81,7 @@ void Message::parseMessage(std::string const &msg)
             _params.push_back(token);
         }
     }
+    std::cout << "PARSED: CMD=" << _command << " PARAMS=";
+    for (size_t i = 0; i < _params.size(); ++i) std::cout << "[" << _params[i] << "]";
+        std::cout << " TRAILING=" << _trailing << std::endl;
 }

@@ -6,7 +6,7 @@
 /*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 20:59:19 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/06/14 19:32:45 by ibaranov         ###   ########.fr       */
+/*   Updated: 2025/06/28 14:59:21 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,10 @@ class Server
 		void cleanup();
 		Channel* getOrCreateChannel(const std::string &name);
 		std::vector<Channel*> getChannelsForClient(Client *client);
+		Channel* getChannel(const std::string &channelName);
+		Client* getClientByNickname(const std::string &nickname);
+
+		
 	private:
 		int _sockfd;
 		int _port;
