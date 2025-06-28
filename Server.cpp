@@ -134,11 +134,22 @@ bool Server::getLineFromRingBuffer(Client *client, std::string &line)
     line.clear();
     size_t len = 0;
     bool overflow = false;
+    bool foundNewline = false;
     
-    while (client->getRingBuffer().getElem(c))
+    RingBuffer<char, 512> &rb = client->getRingBuffer();
+    if (rb.isEmpty())
+    	return false;
+    
+    size_t i = 0;
+    for (; i < rb.getSize(); ++i)
     {
-        if (c == '\n')
+        if (!rb.peekAhead(i,c))
             break ;
+        if (c == '\n')
+        {
+            foundNewline = true;
+            break ;
+        }
         if (len >= MAX_LEN - 2) // 2 for \r\n
             overflow = true;
         if (!overflow && c != '\r')
@@ -153,6 +164,10 @@ bool Server::getLineFromRingBuffer(Client *client, std::string &line)
         line.clear();
         return false;
     }
+    if (!foundNewline)
+        return false;
+    for (size_t j=0; j <= i; ++j)
+    	rb.getElem(c);
     return (!line.empty());
 }
 

@@ -68,6 +68,15 @@ class RingBuffer
 			return (N + _head - _tail);
 		}
 		
+		bool peekAhead(std::size_t offset, T &elem) const
+		{
+			if (isEmpty() || offset >= getSize())
+				return false;
+			std::size_t index = (_tail + offset) % N;
+			elem = _buffer[index];
+			return true;
+		}
+		
 	private:
 		T _buffer[N + 1];
 		std::size_t _tail;
