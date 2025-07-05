@@ -9,28 +9,6 @@ void IRCReplies::sendReply(Client *client, int code, const std::string &message)
     client->sendMsgToClient(oss.str());
 }
 
-// Registration replies (001-004)
-void IRCReplies::sendWelcome(Client *client)
-{
-    std::string msg = ":Welcome to the IRC Network " + client->getNickname() + "!" + client->getUsername() + "@127.0.0.1";
-    sendReply(client, 1, msg);
-}
-
-void IRCReplies::sendYourHost(Client *client)
-{
-    sendReply(client, 2, ":Your host is ircserv, running version 1.0");
-}
-
-void IRCReplies::sendCreated(Client *client)
-{
-    sendReply(client, 3, ":This server was created today");
-}
-
-void IRCReplies::sendMyInfo(Client *client)
-{
-    sendReply(client, 4, "ircserv 1.0 o o");
-}
-
 // Channel replies
 void IRCReplies::sendNameReply(Client *client, const std::string &channel, const std::string &names)
 {

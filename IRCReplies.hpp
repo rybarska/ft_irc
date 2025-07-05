@@ -8,12 +8,6 @@ class Client;
 class IRCReplies
 {
 public:
-    // Registration replies (001-004) - REQUIRED for Irssi
-    static void sendWelcome(Client *client);
-    static void sendYourHost(Client *client);
-    static void sendCreated(Client *client);
-    static void sendMyInfo(Client *client);
-    
     // Channel replies
     static void sendNameReply(Client *client, const std::string &channel, const std::string &names);
     static void sendEndOfNames(Client *client, const std::string &channel);

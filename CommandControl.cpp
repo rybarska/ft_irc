@@ -6,7 +6,7 @@
 /*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:14:44 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/06/28 16:23:11 by ibaranov         ###   ########.fr       */
+/*   Updated: 2025/07/05 18:11:52 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,7 +223,7 @@ void CommandControl::processPass(Client &client, const Message &msg)
 {
     if (client.isAuthed())
     {
-        // TODO: send error to client
+        IRCReplies::sendAlreadyRegistered(&client);
         return ;
     }
     if (!msg.getParams().empty())
@@ -234,8 +234,8 @@ void CommandControl::processPass(Client &client, const Message &msg)
     }
     else
     {
+        IRCReplies::sendNeedMoreParams(&client, "PASS");
         std::cout << "PASS command missing parameter!" << std::endl;
-        // TODO: send error to client
     }
 }
 
@@ -243,26 +243,43 @@ void CommandControl::processNick(Client &client, const Message &msg)
 {
 	std::cout << "NICK: ";
 	if (msg.getParams().empty())
-		std::cout << "(none)" << std::endl;
-	else
 	{
-		std::cout << msg.getParams()[0] << std::endl;
-		client.setNickname(msg.getParams()[0]);
-		client._hasNick = true;
+		std::cout << "(none)" << std::endl;
+		IRCReplies::sendNeedMoreParams(&client, "NICK");
+		return;
 	}
+	
+	const std::string &newNick = msg.getParams()[0];
+	std::cout << newNick << std::endl;
+	
+	// Check if nickname is already in use (if server instance is available)
+	if (g_serverInstance) {
+		Client *existingClient = g_serverInstance->getClientByNickname(newNick);
+		if (existingClient && existingClient != &client) {
+			IRCReplies::sendNicknameInUse(&client, newNick);
+			return;
+		}
+	}
+	
+	client.setNickname(newNick);
+	client._hasNick = true;
 }
 
 void CommandControl::processUser(Client &client, const Message &msg)
 {
 	std::cout << "USER: ";
-	if (msg.getParams().empty())
-		std::cout << "(none)" << std::endl;
-	else
+	// USER command needs: username [hostname] [servername] :realname
+	// Require at least username + realname (trailing)
+	if (msg.getParams().size() < 1 || msg.getTrailing().empty())
 	{
-		std::cout << msg.getParams()[0] << std::endl;
-		client.setUsername(msg.getParams()[0]);
-		client._hasUser = true;
+		std::cout << "(need at least username and realname)" << std::endl;
+		IRCReplies::sendNeedMoreParams(&client, "USER");
+		return;
 	}
+	
+	std::cout << msg.getParams()[0] << std::endl;
+	client.setUsername(msg.getParams()[0]);
+	client._hasUser = true;
 }
 
 void CommandControl::processJoin(Client &client, const Message &msg)
@@ -278,6 +295,13 @@ void CommandControl::processJoin(Client &client, const Message &msg)
     }
     
     const std::string channelName = msg.getParams()[0];
+    
+    // Validate channel name format - must start with #
+    if (channelName.empty() || channelName[0] != '#') {
+        IRCReplies::sendNoSuchChannel(&client, channelName);
+        return;
+    }
+    
     std::string channelKey;
     
     // Check if a key was provided
@@ -359,45 +383,78 @@ void CommandControl::processJoin(Client &client, const Message &msg)
 
 void CommandControl::processPriv(Client &client, const Message &msg)
 {
+    if (!client.isRegistered()) {
+        IRCReplies::sendNotRegistered(&client);
+        return;
+    }
+    
     // Check that both a target and trailing message exist
     if (msg.getParams().empty() || msg.getTrailing().empty())
     {
+        IRCReplies::sendNeedMoreParams(&client, "PRIVMSG");
         std::cout << "PRIVMSG: Missing target or message text" << std::endl;
         return;
     }
     
-    
     std::string target = msg.getParams()[0];
     std::string messageText = msg.getTrailing();
     
-    
-    Channel *channel = g_serverInstance->getOrCreateChannel(target);
-    
-    // Check if client is in that channel; if not, you may want to send an error.
-    if (!channel->hasClient(&client))
-    {
-        std::cout << "Client " << client.getFd() 
-                  << " is not in channel " << target << std::endl;
+    if (!g_serverInstance) {
+        std::cout << "ERROR: Server instance not available" << std::endl;
         return;
     }
     
-    // Format the message in IRC PRIVMSG style:
-    // :<NICK> PRIVMSG <CHANNEL> :<message>
-    std::string outMsg = ":" + client.getNickname() + " PRIVMSG " + target 
-                         + " :" + messageText + "\r\n";
-    
-    // Broadcast the message to all clients in the channel except the sender
-    channel->broadcastMessage(outMsg, &client);
+    // Check if target is a channel (starts with #)
+    if (target[0] == '#') {
+        Channel *channel = g_serverInstance->getChannel(target);
+        
+        if (!channel) {
+            IRCReplies::sendNoSuchChannel(&client, target);
+            return;
+        }
+        
+        // Check if client is in that channel
+        if (!channel->hasClient(&client))
+        {
+            IRCReplies::sendCannotSendToChan(&client, target);
+            std::cout << "Client " << client.getFd() 
+                      << " is not in channel " << target << std::endl;
+            return;
+        }
+        
+        // Format the message in IRC PRIVMSG style:
+        // :<NICK> PRIVMSG <CHANNEL> :<message>
+        std::string outMsg = ":" + client.getNickname() + " PRIVMSG " + target 
+                             + " :" + messageText + "\r\n";
+        
+        // Broadcast the message to all clients in the channel except the sender
+        channel->broadcastMessage(outMsg, &client);
+    }
+    else {
+        // Private message to user
+        Client *targetClient = g_serverInstance->getClientByNickname(target);
+        if (!targetClient) {
+            IRCReplies::sendNoSuchNick(&client, target);
+            return;
+        }
+        
+        // Send private message
+        std::string outMsg = ":" + client.getNickname() + " PRIVMSG " + target 
+                             + " :" + messageText + "\r\n";
+        targetClient->sendMsgToClient(outMsg);
+    }
     
     std::cout << "Processed PRIVMSG from client " << client.getFd() << std::endl;
 }
 
 void CommandControl::processUnknown(Client &client, const Message &msg)
 {
-    (void)client;
+    if (client.isRegistered()) {
+        // Send ERR_UNKNOWNCOMMAND (421) for registered clients
+        std::string reply = ":ircserv 421 " + client.getNickname() + " " + msg.getCommand() + " :Unknown command\r\n";
+        client.sendMsgToClient(reply);
+    }
     std::cout << "Unknown command: " << msg.getCommand() << std::endl;
-    
-   
 }
 
 void CommandControl::processKick(Client &client, const Message &msg)

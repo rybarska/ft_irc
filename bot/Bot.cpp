@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Bot.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arybarsk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 15:40:12 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/06/29 15:40:17 by arybarsk         ###   ########.fr       */
+/*   Updated: 2025/07/05 18:53:08 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ bool Bot::sendMsgToServer(std::string const &msg)
 
 bool Bot::registerBot()
 {
-   if (!sendMsgToServer("PASS " + _password))
+   if (!sendMsgToServer("PASS " + _password))Created new channel: berlin
       return false;
    if (!sendMsgToServer("NICK bot"))
       return false;

@@ -6,11 +6,12 @@
 /*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 20:59:06 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/06/28 14:59:21 by ibaranov         ###   ########.fr       */
+/*   Updated: 2025/07/05 18:51:20 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "IRCReplies.hpp"
 
 Server *g_serverInstance = NULL;
 //TODO: initialise all necessary server state for user/channel management
@@ -41,7 +42,7 @@ bool Server::configAddrInfo()
     _hints.ai_socktype = SOCK_STREAM; // SOCK_STREAM - TCP stream socket, not SOCK_DGRAM
     _hints.ai_flags = AI_PASSIVE; // AI_PASSIVE - to fill in our IP
     
-    _status = getaddrinfo(NULL, portString.c_str(), &_hints, &_servinfo);
+    _status = getaddrinfo("0.0.0.0", portString.c_str(), &_hints, &_servinfo);
     if (_status != 0)
     {
         std::cerr << "Error (getaddrinfo): " << gai_strerror(_status) << std::endl;
@@ -321,12 +322,13 @@ bool Server::attemptRegistration(Client *client)
     if (client->isRegistered())
     {
         std::cout << "Registered!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        // Send RPL_WELCOME (001)
         std::string nick = client->getNickname();
         std::string user = client->getUsername();
         std::string host = "localhost";
-        client->sendMsgToClient(":ircserv 001 " + nick + " :Welcome to the IRC network, " + nick + "!" + user + "@" + host);
-        // Optionally send more numerics (002, 003, 004, etc.)
+        client->sendMsgToClient(":ircserv 001 " + nick + " :Welcome to the IRC network, " + nick + "!" + user + "@" + host + "\r\n");
+        client->sendMsgToClient(":ircserv 002 " + nick + " :Your host is ircserv, running version 1.0\r\n");
+        client->sendMsgToClient(":ircserv 003 " + nick + " :This server was created today\r\n");
+        client->sendMsgToClient(":ircserv 004 " + nick + " ircserv 1.0 o o\r\n");
     }
     
     return true;
