@@ -31,7 +31,7 @@ clean:
 fclean: clean
 	rm -f $(NAME) $(BOT_NAME)
 
-re: fclean all
+re: fclean all bot
 
 -include $(OBJ:.o=.d)
 -include $(BOT_OBJ:.o=.d)
