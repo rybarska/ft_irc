@@ -50,6 +50,18 @@ int main(int argc, char **argv)
 		return (1);
 	}
 	
+	// Ignore SIGPIPE so send/recv errors can be handled in code, not via signals
+	struct sigaction sa_pipe;
+	memset(&sa_pipe, 0, sizeof(sa_pipe));
+	sa_pipe.sa_handler = SIG_IGN;
+	sa_pipe.sa_flags = 0;
+	
+	if (sigaction(SIGPIPE, &sa_pipe, NULL) == -1) 
+	{
+		perror("sigaction(SIGPIPE)");
+		return (1);
+	}
+	
 	try
 	{
 		int port;
