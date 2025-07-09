@@ -22,6 +22,8 @@
 #include <poll.h>
 #include <errno.h>
 
+extern volatile __sig_atomic_t g_oOnBotting;
+
 class Bot
 {
 	public:

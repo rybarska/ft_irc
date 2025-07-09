@@ -10,10 +10,43 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <csignal>
+#include <cstdio>
 #include "Bot.hpp"
+
+volatile sig_atomic_t g_oOnBotting = 1;
+
+void	handle_sig(int sig)
+{
+	(void) sig;
+	g_oOnBotting = 0;
+}
 
 int main()
 {
+	struct sigaction sa;
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = handle_sig;
+	sa.sa_flags = SA_RESTART;
+	
+	if (sigaction(SIGINT, &sa, NULL) == -1 // for Ctrl-C
+		|| sigaction(SIGTERM, &sa, NULL) == -1) // for kill command
+	{
+		perror("sigaction");
+		return (1);
+	}
+	
+	struct sigaction sa_pipe;
+	memset(&sa_pipe, 0, sizeof(sa_pipe));
+	sa_pipe.sa_handler = SIG_IGN;
+	sa_pipe.sa_flags = 0;
+	
+	if (sigaction(SIGPIPE, &sa_pipe, NULL) == -1) 
+	{
+		perror("sigaction(SIGPIPE)");
+		return (1);
+	}
+	
 	Bot bot("127.0.0.1", 1069, "123456");
 	
 	if (!bot.getRunning())
