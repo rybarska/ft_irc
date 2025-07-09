@@ -254,6 +254,8 @@ void Server::pollEvents()
         
         if (eventCount == -1)
         {
+            if (errno == EINTR) // normal when poll() gets interrupted by SIGINT
+            	break ; 
             std::cerr << "Error (poll): " << std::strerror(errno) << std::endl;
             break ;
         }
