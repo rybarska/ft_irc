@@ -16,6 +16,7 @@
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h> // for close()
 #include "RingBuffer.hpp"
 
 class Client

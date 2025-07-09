@@ -103,7 +103,21 @@ bool Client::sendMsgToClient(std::string const &msg)
 {
 	std::string formattedMsg = msg + "\r\n";
 	if (send(_clientfd, formattedMsg.c_str(), formattedMsg.size(), 0) == -1)
+	{
+		// EPIPE is graceful close
+		// ECONNRESET is e.g. crashing, rebooting, or improper close() call
+		if (errno == EPIPE || errno == ECONNRESET)
+		{
+			std::cerr << "Closing fd " << _clientfd << std::endl;
+			close(_clientfd);
+			_clientfd = -1;
+		}
+		else
+		{
+			std::cerr << "send error: " << std::strerror(errno) << std::endl;
+		}
 		return false;
+	}
 	return true;
 }
 
