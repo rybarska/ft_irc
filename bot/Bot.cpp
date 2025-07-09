@@ -100,11 +100,11 @@ bool Bot::sendMsgToServer(std::string const &msg)
 
 bool Bot::registerBot()
 {
-   if (!sendMsgToServer("PASS " + _password))Created new channel: berlin
+   if (!sendMsgToServer("PASS " + _password))
       return false;
    if (!sendMsgToServer("NICK bot"))
       return false;
-   if (!sendMsgToServer("USER bot"))
+   if (!sendMsgToServer("USER bot 0 * :just a simple bot"))
       return false;
    return true;
 }
@@ -114,7 +114,9 @@ bool Bot::getRunning()
    if (!setSocketAndConnect())
       throw std::runtime_error("Bot could not set socket");
    registerBot();
-   //sendMsgToServer("JOIN berlin");
-   //sendMsgToServer("PRIVMSG #berlin :I use Arch Linux");    
+   sleep(1);
+   sendMsgToServer("JOIN #berlin");
+   sendMsgToServer("PRIVMSG #berlin :I use Arch Linux");
+   sleep(1000000000);  
    return true;
 }
