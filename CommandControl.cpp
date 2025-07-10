@@ -19,9 +19,6 @@
 
 extern Server* g_serverInstance;
 
-//TODO: implement full IRC registration flow, including NICK and USER validation.
-//TODO: implement command routing for JOIN, PRIVMSG, PART, QUIT, MODE, TOPIC etc.
-
 CommandControl::CommandControl()
 {
 	_controls["PASS"] = &CommandControl::processPass;

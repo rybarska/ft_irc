@@ -15,8 +15,6 @@
 #include "Server.hpp"
 #include "commandLineUtils.cpp"
 
-//TODO: might want to add error or log system instead of std::cerr / std::cout
-
 volatile sig_atomic_t g_oOn = 1;
 volatile sig_atomic_t g_sigCaught = 0;
 

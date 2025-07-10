@@ -14,9 +14,6 @@
 #include "IRCReplies.hpp"
 
 Server *g_serverInstance = NULL;
-//TODO: initialise all necessary server state for user/channel management
-//TODO: gracefully disconnect all clients before shutdown
-//TODO: deallocate any added memory / resources
 
 Server::Server(int port, const std::string &password)
 : _sockfd(-1), _port(port), _password(password), _servinfo(NULL), _cmdControl()
@@ -122,8 +119,6 @@ bool Server::pushNewClient()
     
     _clients.insert(std::make_pair<int, Client *>(clientfd, new Client(clientfd)));
     
-    //TODO: Consider prompting for password
-    
     return true;
 }
 
@@ -174,10 +169,6 @@ bool Server::getLineFromRingBuffer(Client *client, std::string &line)
 
 bool Server::processClientInput(size_t index)
 {
-//TODO: sanitize input for protocol compliance, e.g. max 512 bytes per RFC 2812
-//TODO: implement rate-limiting or anti-flood protection if necessary
-//TODO: handle errors for _cmdControl.processCommand more gracefully
-    
     int clientfd = _pollfds[index].fd;
     char tempBuffer[512];
     int bufLen = sizeof(tempBuffer) - 1;
@@ -236,8 +227,6 @@ bool Server::processClientInput(size_t index)
 
 void Server::pollEvents()
 {
-//TODO: use timeout or explicitly detect and clean up disconnected or idle clients
-//TODO: Add signal handling for graceful shutdown, e.g. SIGINT
 
     struct pollfd pfd;
     pfd.fd = _sockfd;
