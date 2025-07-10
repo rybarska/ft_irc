@@ -49,10 +49,18 @@ int main()
 	
 	Bot bot("127.0.0.1", 1069, "123456");
 	
-	if (!bot.getRunning())
+	try
 	{
-		std::cerr << "Bot could not get running" << std::endl;
-		return 1;
+		if (!bot.getRunning())
+		{
+			std::cerr << "Bot could not get running" << std::endl;
+			return 1;
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "Exception in bot's main: " << e.what() << std::endl;
+		return (1);
 	}
 	
 	return 0;
