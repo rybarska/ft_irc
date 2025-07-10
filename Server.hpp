@@ -78,6 +78,8 @@ class Server
 		
 		bool attemptAuth(Client *client);
 		bool attemptRegistration(Client *client);
+
+		void ditchDisconnectedClients();
 		
 		Server();
 		Server(const Server &source);

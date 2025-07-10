@@ -19,11 +19,15 @@
 Client::Client(int fd)
 : _hasPass(false), _hasNick(false), _hasUser(false),
 _clientfd(fd), _clientPassword(""), _nickname(""), _username(""),
-_authed(false), _registered(false)
-{}
+_authed(false), _registered(false), _disconnected(false)
+{
+	std::cout << "Client created at fd " << fd << std::endl;
+}
 
 Client::~Client()
-{}
+{
+	std::cout << "Client destroyed at fd " << _clientfd << std::endl;
+}
 
 int Client::getFd() const
 {
@@ -75,6 +79,11 @@ void Client::setRegistered()
 	_registered = true;
 }
 
+void Client::setDisconnected()
+{
+	_disconnected = true;
+}
+
 void Client::addInputToRingBuffer(char c)
 {
 	_ringbuffer.addElem(c);
@@ -99,8 +108,17 @@ bool Client::isRegistered()
 	return true;
 }
 
+bool Client::isDisconnected()
+{
+	if (!_disconnected)
+		return false;
+	return true;
+}
+
 bool Client::sendMsgToClient(std::string const &msg)
 {
+	if (_clientfd == -1)
+		return false;
 	std::string formattedMsg = msg + "\r\n";
 	if (send(_clientfd, formattedMsg.c_str(), formattedMsg.size(), 0) == -1)
 	{
@@ -108,9 +126,9 @@ bool Client::sendMsgToClient(std::string const &msg)
 		// ECONNRESET is e.g. crashing, rebooting, or improper close() call
 		if (errno == EPIPE || errno == ECONNRESET)
 		{
-			std::cerr << "Closing fd " << _clientfd << std::endl;
-			close(_clientfd);
-			_clientfd = -1;
+			std::cerr << "Client at fd " << _clientfd << "disconnected" << std::endl;
+			std::cerr << "(send error: " << std::strerror(errno) << ")" << std::endl;
+			setDisconnected();
 		}
 		else
 		{

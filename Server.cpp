@@ -278,6 +278,8 @@ void Server::pollEvents()
                 }
             }
         }
+
+        ditchDisconnectedClients();
     }
 }
 
@@ -334,6 +336,39 @@ bool Server::attemptRegistration(Client *client)
     }
     
     return true;
+}
+
+void Server::ditchDisconnectedClients()
+{
+    
+    std::map<int, Client*>::iterator it = _clients.begin();
+    while(it != _clients.end())
+    {
+        if (it->second->isDisconnected())
+        {
+            int fd = it->second->getFd();
+            if (fd != -1)
+                close(fd);
+            delete it->second;
+            
+            std::map<int, Client*>::iterator toErase = it;
+            ++it;
+            _clients.erase(toErase);
+        
+            for (std::vector<struct pollfd>::iterator it_p = _pollfds.begin(); it_p != _pollfds.end(); ++it_p)
+            {
+                if (it_p->fd == fd)
+                {
+                    _pollfds.erase(it_p);
+                    break ;
+                }
+            }
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 void Server::cleanup()

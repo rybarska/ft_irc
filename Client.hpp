@@ -37,12 +37,14 @@ class Client
 		void setUsername(const std::string &username);
 		void setAuthed();
 		void setRegistered();
+		void setDisconnected();
 		
 		void addInputToRingBuffer(char c);
 		void clearRingBuffer();
 		
 		bool isAuthed();
 		bool isRegistered();
+		bool isDisconnected();
 		
 		bool sendMsgToClient(std::string const &msg);
 		
@@ -60,6 +62,7 @@ class Client
 		std::string _username;
 		bool _authed;
 		bool _registered;
+		bool _disconnected;
 		
 		RingBuffer<char, 512> _ringbuffer;
 		
