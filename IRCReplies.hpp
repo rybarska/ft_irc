@@ -14,6 +14,10 @@ public:
     static void sendTopic(Client *client, const std::string &channel, const std::string &topic);
     static void sendNoTopic(Client *client, const std::string &channel);
     
+    // WHO replies
+    static void sendWhoReply(Client *client, const std::string &channel, const std::string &user, const std::string &host, const std::string &server, const std::string &nick, const std::string &flags, const std::string &realname);
+    static void sendEndOfWho(Client *client, const std::string &name);
+    
     // Success replies
     static void sendInviting(Client *client, const std::string &nick, const std::string &channel);
     

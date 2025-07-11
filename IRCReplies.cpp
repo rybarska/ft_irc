@@ -30,6 +30,17 @@ void IRCReplies::sendNoTopic(Client *client, const std::string &channel)
     sendReply(client, 331, channel + " :No topic is set");
 }
 
+// WHO replies
+void IRCReplies::sendWhoReply(Client *client, const std::string &channel, const std::string &user, const std::string &host, const std::string &server, const std::string &nick, const std::string &flags, const std::string &realname)
+{
+    sendReply(client, 352, channel + " " + user + " " + host + " " + server + " " + nick + " " + flags + " :0 " + realname);
+}
+
+void IRCReplies::sendEndOfWho(Client *client, const std::string &name)
+{
+    sendReply(client, 315, name + " :End of /WHO list");
+}
+
 // Success replies
 void IRCReplies::sendInviting(Client *client, const std::string &nick, const std::string &channel)
 {

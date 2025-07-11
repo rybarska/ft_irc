@@ -6,7 +6,7 @@
 /*   By: ibaranov <ibaranov@student.42vienna.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:14:44 by arybarsk          #+#    #+#             */
-/*   Updated: 2025/07/05 18:11:52 by ibaranov         ###   ########.fr       */
+/*   Updated: 2025/07/11 16:11:59 by ibaranov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ CommandControl::CommandControl()
     _controls["KICK"] = &CommandControl::processKick;
     _controls["INVITE"] = &CommandControl::processInvite;
     _controls["PART"] = &CommandControl::processPart;
+    _controls["WHO"] = &CommandControl::processWho;
     
 }
 		
@@ -291,11 +292,17 @@ void CommandControl::processJoin(Client &client, const Message &msg)
         return;
     }
     
-    const std::string channelName = msg.getParams()[0];
+    const std::string& originalName = msg.getParams()[0];
+    std::string channelName = originalName;
     
-    // Validate channel name format - must start with #
-    if (channelName.empty() || channelName[0] != '#') {
-        IRCReplies::sendNoSuchChannel(&client, channelName);
+    // Auto-add # prefix if missing (common IRC behavior)
+    if (!channelName.empty() && channelName[0] != '#') {
+        channelName = "#" + channelName;
+    }
+    
+    // Validate channel name format
+    if (channelName.empty() || channelName.length() < 2) {
+        IRCReplies::sendNoSuchChannel(&client, originalName);
         return;
     }
     
@@ -396,6 +403,13 @@ void CommandControl::processPriv(Client &client, const Message &msg)
     std::string target = msg.getParams()[0];
     std::string messageText = msg.getTrailing();
     
+    // Check for CTCP messages (start and end with \001)
+    bool isCTCP = false;
+    if (messageText.length() >= 2 && messageText[0] == '\001' && messageText[messageText.length()-1] == '\001') {
+        isCTCP = true;
+        std::cout << "CTCP message detected: " << messageText << std::endl;
+    }
+    
     if (!g_serverInstance) {
         std::cout << "ERROR: Server instance not available" << std::endl;
         return;
@@ -435,10 +449,15 @@ void CommandControl::processPriv(Client &client, const Message &msg)
             return;
         }
         
-        // Send private message
+        // Send private message (including CTCP messages for DCC)
         std::string outMsg = ":" + client.getNickname() + " PRIVMSG " + target 
                              + " :" + messageText + "\r\n";
         targetClient->sendMsgToClient(outMsg);
+        
+        // Log CTCP/DCC requests
+        if (isCTCP) {
+            std::cout << "CTCP/DCC: " << client.getNickname() << " -> " << target << ": " << messageText << std::endl;
+        }
     }
     
     std::cout << "Processed PRIVMSG from client " << client.getFd() << std::endl;
@@ -795,4 +814,55 @@ void CommandControl::processPart(Client &client, const Message &msg)
         
         std::cout << "PART: " << client.getNickname() << " left " << channelName << " (" << partMessage << ")" << std::endl;
     }
+}
+
+void CommandControl::processWho(Client &client, const Message &msg)
+{
+    if (!client.isRegistered()) {
+        IRCReplies::sendNotRegistered(&client);
+        return;
+    }
+    
+    std::string target = "*"; // Default target
+    if (!msg.getParams().empty()) {
+        target = msg.getParams()[0];
+    }
+    
+    // If target is a channel
+    if (!target.empty() && target[0] == '#') {
+        Channel* channel = g_serverInstance->getChannel(target);
+        if (channel) {
+            // Send WHO reply for each user in the channel
+            const std::vector<Client*>& clients = channel->getClients();
+            for (std::vector<Client*>::const_iterator it = clients.begin(); it != clients.end(); ++it) {
+                Client* channelClient = *it;
+                std::string flags = "H"; // Here (not away)
+                if (channel->isOperator(channelClient)) {
+                    flags += "@";
+                }
+                IRCReplies::sendWhoReply(&client, target, 
+                                       channelClient->getUsername(), 
+                                       "localhost", 
+                                       "ircserv", 
+                                       channelClient->getNickname(), 
+                                       flags, 
+                                       channelClient->getUsername());
+            }
+        }
+    } else if (target != "*") {
+        // Target is a specific nickname
+        Client* targetClient = g_serverInstance->getClientByNickname(target);
+        if (targetClient && targetClient->isRegistered()) {
+            std::string flags = "H"; // Here (not away)
+            IRCReplies::sendWhoReply(&client, "*", 
+                                   targetClient->getUsername(), 
+                                   "localhost", 
+                                   "ircserv", 
+                                   targetClient->getNickname(), 
+                                   flags, 
+                                   targetClient->getUsername());
+        }
+    }
+    
+    IRCReplies::sendEndOfWho(&client, target);
 }
