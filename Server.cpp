@@ -132,7 +132,7 @@ bool Server::getLineFromRingBuffer(Client *client, std::string &line)
     bool overflow = false;
     bool foundNewline = false;
     
-    RingBuffer<char, 512> &rb = client->getRingBuffer();
+    RingBuffer<char, MAX_MSG_SIZE * 10> &rb = client->getRingBuffer();
     if (rb.isEmpty())
     	return false;
     
@@ -335,6 +335,10 @@ void Server::ditchDisconnectedClients()
     {
         if (it->second->isDisconnected())
         {
+            std::map<std::string, Channel*>::iterator chan;
+            for (chan = _channels.begin(); chan != _channels.end(); ++chan)
+            	chan->second->removeClient(it->second);
+            
             int fd = it->second->getFd();
             if (fd != -1)
                 close(fd);

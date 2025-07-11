@@ -16,15 +16,17 @@
 #include <iostream>
 #include <string>
 
+#define MAX_MSG_SIZE 512
+
 template <typename T, int N>
 class RingBuffer
 {
 	public:
 		RingBuffer() :  _tail(0), _head(0), _full(false)
 		{
-			if (N <= 0 || N > 512)
+			if (N <= 0 || N > MAX_MSG_SIZE * 10)
 			{
-				throw std::invalid_argument("RingBuffer size must be between 1 and 512");
+				throw std::invalid_argument("RingBuffer size must be between 1 and 5120");
 			}
 		};
 		

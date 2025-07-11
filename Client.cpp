@@ -49,7 +49,7 @@ std::string const &Client::getUsername() const
 	return _username;
 }
 
-RingBuffer<char, 512> &Client::getRingBuffer()
+RingBuffer<char, MAX_MSG_SIZE * 10> &Client::getRingBuffer()
 {
 	return _ringbuffer;
 }
