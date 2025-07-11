@@ -21,7 +21,12 @@ class RingBuffer
 {
 	public:
 		RingBuffer() :  _tail(0), _head(0), _full(false)
-		{};
+		{
+			if (N <= 0 || N > 512)
+			{
+				throw std::invalid_argument("RingBuffer size must be between 1 and 512");
+			}
+		};
 		
 		~RingBuffer()
 		{};
