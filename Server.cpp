@@ -258,18 +258,14 @@ void Server::pollEvents()
                 if (_pollfds[i].fd == _sockfd)
                 {
                     if (!pushNewClient())
-                        ++i;
+                        continue ;
                 }
                 else
                 {
-                    if (!processClientInput(i))
+                    if (processClientInput(i))
                         continue ;
-                    else
-                    	++i;
                 }
             }
-            else
-            	++i;
         }
 
         ditchDisconnectedClients();
