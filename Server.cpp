@@ -124,8 +124,6 @@ bool Server::pushNewClient()
 
 bool Server::getLineFromRingBuffer(Client *client, std::string &line)
 {
-    const size_t MAX_LEN = 512; // per RFC 2812, includes \r\n
-    
     char c;
     line.clear();
     size_t len = 0;
@@ -146,7 +144,7 @@ bool Server::getLineFromRingBuffer(Client *client, std::string &line)
             foundNewline = true;
             break ;
         }
-        if (len >= MAX_LEN - 2) // 2 for \r\n
+        if (len >= MAX_MSG_SIZE - 2) // 2 for \r\n
             overflow = true;
         if (!overflow && c != '\r')
         {
@@ -170,7 +168,7 @@ bool Server::getLineFromRingBuffer(Client *client, std::string &line)
 bool Server::processClientInput(size_t index)
 {
     int clientfd = _pollfds[index].fd;
-    char tempBuffer[512];
+    char tempBuffer[MAX_MSG_SIZE];
     int bufLen = sizeof(tempBuffer) - 1;
     int flags = 0;
     

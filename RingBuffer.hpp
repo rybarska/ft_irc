@@ -16,7 +16,7 @@
 #include <iostream>
 #include <string>
 
-#define MAX_MSG_SIZE 512
+#define MAX_MSG_SIZE 512 // per RFC 2812, includes \r\n
 
 template <typename T, int N>
 class RingBuffer
