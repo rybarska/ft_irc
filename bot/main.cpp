@@ -48,13 +48,14 @@ int main(int argc, char **argv)
 		return (1);
 	}
 
+	std::string host;
 	int port;
 	std::string password;
 
-	if (!parseCommandLineArgs(argc, argv, port, password))
+	if (!parseCommandLineArgs(argc, argv, host, port, password))
 		return (1);
 
-	Bot bot("127.0.0.1", port, password);
+	Bot bot(host, port, password);
 
 	try
 	{
