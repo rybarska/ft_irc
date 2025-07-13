@@ -6,12 +6,13 @@ The server is stable, supports multiple clients, and handles core IRC commands. 
 
 ⚙️ HOW TO RUN IT
 
+* Use "make" to compile the server, "make bot" to compile the bot, and "make re" to compile both
+
 In one terminal:
 ```bash
 make re
 ./ircserv <port> <password>
 ```
-* Use "make" to compile the server, "make bot" to compile the bot, and "make re" to compile both
 
 In another terminal (or several):
 ```bash
