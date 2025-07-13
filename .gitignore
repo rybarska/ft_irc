@@ -8,7 +8,6 @@
 # Executables
 ircserv
 ircbot
-bot
 
 # Dependency files
 *.d
