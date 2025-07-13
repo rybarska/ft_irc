@@ -1,62 +1,77 @@
-27/05/2005: here is about 30% of the mandatory part of ft__irc.
+ft_irc is a simplified IRC (Internet Relay Chat) server written in C++98 as part of the 42 curriculum. It supports basic client-server communication, multi-client handling using poll(), IRC command parsing, and more — all built without external libraries or frameworks.
 
-Reference: the newest version of the "Beej's Guide to Network Programming", https://beej.us/guide/bgnet/pdf/bgnet_a4_c_1.pdf
+📌 Educational focus: This project is about learning networking, parsing, and server-client architectures — not production-ready security or IRC compliance.
 
-🧐️  HOW YOU CAN TEST IT AT THE MOMENT:
+The server is stable, supports multiple clients, and handles core IRC commands. We also added a spam bot for testing, a robust signal handler to prevent crashes, and a file transfer feature.
 
-* Terminal 1:
+⚙️ HOW TO RUN IT
+In one terminal:
 ```bash
-make
+make re
+// Use "make" to compile the server, "make bot" to compile the bot, and "make re" to compile both 
 ./ircserv <port> <password>
+// e.g. ./ircserv 6667 password
 ```
-* Terminal 2 (or more):
+In another terminal (or several):
 ```bash
 telnet localhost <port>
 PASS <password>
-NICK nick
-USER user
+NICK mynick
+USER myuser 0 * :My Real Name
+```
+Or test it with our bot (optional):
+```bash
+./ircbot <host> <port> <password>
+// e.g. ./ircbot localhost 6667 password
 ```
 
-😁️  WHAT’S IMPLEMENTED
+🧩 Server & Client Core
 
-Command-line parsing with argument validation <port> <password>.
+🔌 Server setup
 
-Server socket setup using getaddrinfo(), socket(), bind(), and listen() (IPv4/IPv6-compatible).
+Uses getaddrinfo(), socket(), bind(), listen(), and poll() for cross-platform IPv4/IPv6 compatibility.
 
-Graceful accept() of new clients, added to a pollfd array and tracked with client FDs.
+Gracefully accepts new clients and tracks them in a dynamic pollfd array.
 
-Basic I/O loop using poll(), handling incoming messages and connection drops.
+🔁 Ring Buffer per client
 
-Ring buffer (circular buffer) input parsing per client with line-by-line processing.
+Each client has a circular buffer to read incoming data line-by-line without truncation or overflow.
 
-Message parsing via the Message class.
+✉️ Message parsing
 
-Command dispatch via _cmdControl.processCommand().
+The Message class extracts IRC command name, parameters, and trailing text from each client input.
 
-Authentication hooks: attemptAuth() and attemptRegistration() stubs are in place.
+🧠 Command dispatch
 
-Basic cleanup on signal.
+Input lines are dispatched via _cmdControl.processCommand() to corresponding command handlers.
 
+🔐 Signal handling
 
-🤔️  WHAT STILL NEEDS TO BE DONE
+sigaction() is used to cleanly catch signals (e.g., SIGINT) and shut down the server without crashes.
 
-User & channel state management: Implement structures and logic for managing nicknames, usernames, channels, modes, etc.
+🤖 Spam bot
 
-Full command support: Only partial or no handling for standard IRC commands (JOIN, PRIVMSG, NICK, etc.).
+A separate IRC bot connects and sends a flood of messages to test stability and rate-limiting.
 
-Authentication enforcement: Actually check passwords and reject invalid login attempts.
+🧑‍💻 IRC Functionality
 
-Send QUIT or ERROR messages to clients before disconnecting.
+🗣️ IRC Commands
 
-Input sanitization:
+Full support for core IRC commands: PASS, NICK, USER, JOIN, PART, PRIVMSG, NOTICE, PART, QUIT, etc.
 
-Prevent malformed command crashes.
+Proper error messages and registration enforcement.
 
-Logging: Replace std::cout/cerr with a proper logging or debug mode.
+📁 File transfer
 
-Anti-flood/rate-limiting: Prevent clients from spamming commands.
+Implementation of DCC-like functionality for client-to-client file transmission over raw sockets.
 
-Cleanup of disconnected clients: Currently done ad hoc in processClientInput(); could be cleaner/more robust.
+👥 User & Channel Management
+
+Data structures and logic to manage nicknames, usernames, channels, and user modes.
+
+🧹 Client cleanup
+
+Robust disconnect and cleanup logic to handle QUIT, timeouts, and unexpected drops.
 
 
 ## ⚠️ Security Disclaimer
@@ -74,3 +89,22 @@ it is **not possible** to implement secure authentication, password handling, or
 Any password storage, verification, or data transmission in this project should be considered **insecure** and vulnerable to common attacks (e.g., sniffing, spoofing, replay, brute force).
 
 The focus of this project is on learning how IRC-like protocols and server/client architecture work — **not** on implementing production-grade security.
+
+📚 REFERENCES
+
+Beej's Guide to Network Programming (latest version):
+📖 https://beej.us/guide/bgnet/pdf/bgnet_a4_c_1.pdf
+
+RFC 1459 – Internet Relay Chat Protocol:
+🧾 https://datatracker.ietf.org/doc/html/rfc1459
+
+🧑‍💻 AUTHORS
+
+Agata Rybarska – server architecture, signal handling, ring buffer, bot, and infrastructure
+
+Ivan Baranov – IRC functionality, file transfer, and command handling
+
+Contributions visible in Git history.
+
+> 🤝 This project was built with great collaboration. Props to my partner for strong contributions and smooth teamwork.
+
