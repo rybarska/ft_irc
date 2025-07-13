@@ -5,13 +5,14 @@ ft_irc is a simplified IRC (Internet Relay Chat) server written in C++98 as part
 The server is stable, supports multiple clients, and handles core IRC commands. We also added a spam bot for testing, a robust signal handler to prevent crashes, and a file transfer feature.
 
 ⚙️ HOW TO RUN IT
+
 In one terminal:
 ```bash
 make re
-// Use "make" to compile the server, "make bot" to compile the bot, and "make re" to compile both 
 ./ircserv <port> <password>
-// e.g. ./ircserv 6667 password
 ```
+* Use "make" to compile the server, "make bot" to compile the bot, and "make re" to compile both
+
 In another terminal (or several):
 ```bash
 telnet localhost <port>
@@ -22,8 +23,8 @@ USER myuser 0 * :My Real Name
 Or test it with our bot (optional):
 ```bash
 ./ircbot <host> <port> <password>
-// e.g. ./ircbot localhost 6667 password
 ```
+
 
 🧩 Server & Client Core
 
