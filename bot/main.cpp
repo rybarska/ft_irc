@@ -13,6 +13,7 @@
 #include <csignal>
 #include <cstdio>
 #include "Bot.hpp"
+#include "commandLineUtils.cpp"
 
 volatile sig_atomic_t g_oOnBotting = 1;
 
@@ -22,33 +23,39 @@ void	handle_sig(int sig)
 	g_oOnBotting = 0;
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = handle_sig;
 	sa.sa_flags = SA_RESTART;
-	
+
 	if (sigaction(SIGINT, &sa, NULL) == -1 // for Ctrl-C
 		|| sigaction(SIGTERM, &sa, NULL) == -1) // for kill command
 	{
 		perror("sigaction");
 		return (1);
 	}
-	
+
 	struct sigaction sa_pipe;
 	memset(&sa_pipe, 0, sizeof(sa_pipe));
 	sa_pipe.sa_handler = SIG_IGN;
 	sa_pipe.sa_flags = 0;
-	
-	if (sigaction(SIGPIPE, &sa_pipe, NULL) == -1) 
+
+	if (sigaction(SIGPIPE, &sa_pipe, NULL) == -1)
 	{
 		perror("sigaction(SIGPIPE)");
 		return (1);
 	}
-	
-	Bot bot("127.0.0.1", 1069, "123456");
-	
+
+	int port;
+	std::string password;
+
+	if (!parseCommandLineArgs(argc, argv, port, password))
+		return (1);
+
+	Bot bot("127.0.0.1", port, password);
+
 	try
 	{
 		if (!bot.getRunning())
@@ -62,6 +69,6 @@ int main()
 		std::cerr << "Exception in bot's main: " << e.what() << std::endl;
 		return (1);
 	}
-	
+
 	return 0;
 }

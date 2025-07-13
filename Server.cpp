@@ -32,13 +32,13 @@ bool Server::configAddrInfo()
     std::ostringstream portStream;
     portStream << _port;
     std::string portString = portStream.str();
-    
+
     memset(&_hints, 0, sizeof _hints); // to make sure the struct is empty
     //ai stands for addrinfo
     _hints.ai_family = AF_UNSPEC; // AF_UNSPEC - to be able to use either IPv4 or IPv6
     _hints.ai_socktype = SOCK_STREAM; // SOCK_STREAM - TCP stream socket, not SOCK_DGRAM
     _hints.ai_flags = AI_PASSIVE; // AI_PASSIVE - to fill in our IP
-    
+
     _status = getaddrinfo("0.0.0.0", portString.c_str(), &_hints, &_servinfo);
     if (_status != 0)
     {
@@ -51,7 +51,7 @@ bool Server::configAddrInfo()
 bool Server::setListeningSocket()
 {
     struct addrinfo *ptr;
-    
+
     for (ptr = _servinfo; ptr != NULL; ptr = ptr->ai_next)
     {
         _sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
@@ -60,7 +60,7 @@ bool Server::setListeningSocket()
             std::cerr << "Error (socket): " << std::strerror(errno) << std::endl;
             continue ;
         }
-        
+
         // Lose the “Address already in use” message by allowing the program to reuse the port
         int yes = 1;
         if (setsockopt(_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1)
@@ -69,30 +69,30 @@ bool Server::setListeningSocket()
             std::cout << "Error (setsockopt)" << std::endl;
             return false;
         }
-        
+
         if (bind(_sockfd, ptr->ai_addr, ptr->ai_addrlen) == -1)
         {
             close(_sockfd);
             std::cout << "Error (bind)" << std::endl;
             continue ;
         }
-        
+
         break ;
     }
-    
+
     if (ptr == NULL)
     {
         std::cout << "Could not bind socket" << std::endl;
         return false;
     }
-    
+
     if (listen(_sockfd, BACKLOG) == -1)
     {
         close(_sockfd);
         std::cout << "Error (listen)" << std::endl;
         return false;
     }
-    
+
     std::cout << "Server is listening on port " << _port << std::endl;
     return true;
 }
@@ -101,24 +101,24 @@ bool Server::pushNewClient()
 {
     struct sockaddr_storage clientAddr;
     socklen_t addrSize = sizeof clientAddr;
-    
+
     int clientfd = accept(_sockfd, (struct sockaddr *)&clientAddr, &addrSize);
     if (clientfd == -1)
     {
         std::cerr << "Error (accept): " << std::strerror(errno) << std::endl;
         return false;
     }
-    
+
     std::cout << "New connection established at fd " << clientfd << std::endl;
-    
+
     struct pollfd newClient;
     newClient.fd = clientfd;
     newClient.events = POLLIN;
     newClient.revents = 0;
     _pollfds.push_back(newClient);
-    
+
     _clients.insert(std::make_pair<int, Client *>(clientfd, new Client(clientfd)));
-    
+
     return true;
 }
 
@@ -129,11 +129,11 @@ bool Server::getLineFromRingBuffer(Client *client, std::string &line)
     size_t len = 0;
     bool overflow = false;
     bool foundNewline = false;
-    
+
     RingBuffer<char, MAX_MSG_SIZE * 10> &rb = client->getRingBuffer();
     if (rb.isEmpty())
     	return false;
-    
+
     size_t i = 0;
     for (; i < rb.getSize(); ++i)
     {
@@ -171,9 +171,16 @@ bool Server::processClientInput(size_t index)
     char tempBuffer[MAX_MSG_SIZE];
     int bufLen = sizeof(tempBuffer) - 1;
     int flags = 0;
-    
+
     // readout comes in bytes
-    ssize_t readout = recv(clientfd, tempBuffer, bufLen, flags);
+    ssize_t readout;
+    while (true)
+    {
+        readout = recv(clientfd, tempBuffer, bufLen, flags);
+        if (readout == -1 && errno == EINTR)
+            continue ;
+        break ;
+    }
     if (readout <= 0)
     {
         if (readout == 0)
@@ -190,36 +197,36 @@ bool Server::processClientInput(size_t index)
         _clients.erase(clientfd);
         return false;
     }
-    
+
     Client* client = _clients[clientfd];
-    
+
     for (ssize_t i= 0; i < readout; i++)
     {
         client->addInputToRingBuffer(tempBuffer[i]);
     }
-    
+
     std::string line;
     Message msg;
     while (getLineFromRingBuffer(client, line))
     {
         std::cout << "Message received from client " << clientfd << ": " << line << std::endl;
-        
+
         msg.parseMessage(line);
-        
+
         std::cout << "Parsed Message: " << std::endl;
         std::cout << "prefix: " << msg.getPrefix() << std::endl;
         std::cout << "command: " << msg.getCommand() << std::endl;
         for (size_t i=0; i < msg.getParams().size(); i++)
             std::cout << "param " << i << " : " << msg.getParams()[i] << std::endl;
         std::cout << "trailing: " << msg.getTrailing() << std::endl;
-        
+
         _cmdControl.processCommand(*client, msg);
-        
+
         attemptAuth(client);
-        
+
         attemptRegistration(client);
     }
-    
+
     return true;
 }
 
@@ -231,26 +238,26 @@ void Server::pollEvents()
     pfd.events = POLLIN;
     pfd.revents = 0;
     _pollfds.push_back(pfd);
-    
+
     while (g_oOn)
     {
         if (_pollfds.empty())
             continue ;
-        
+
         int eventCount = poll(_pollfds.data(), _pollfds.size(), -1);
-        
+
         if (eventCount == -1)
         {
             if (errno == EINTR) // normal when poll() gets interrupted by SIGINT
-            	break ; 
+            	break ;
             std::cerr << "Error (poll): " << std::strerror(errno) << std::endl;
             break ;
         }
-        
-       
+
+
         for (size_t i=0; i < _pollfds.size(); i++)
         {
-           
+
             if (_pollfds[i].revents & (POLLIN | POLLHUP))
             {
                 if (_pollfds[i].fd == _sockfd)
@@ -276,13 +283,13 @@ bool Server::attemptAuth(Client *client)
 {
     if (client->isRegistered())
         return false;
-    
+
     if (!client->_hasPass)
     {
         std::cout << "Cannot authenticate yet, missing password" << std::endl;
         return false;
     }
-    
+
     if (client->getPassword() != _password)
     {
         std::cerr << "Error (wrong password)" << std::endl;
@@ -292,7 +299,7 @@ bool Server::attemptAuth(Client *client)
         // close(client->getFd());
         return false;
     }
-    
+
     client->setAuthed();
     return true;
 }
@@ -301,15 +308,15 @@ bool Server::attemptRegistration(Client *client)
 {
     if (client->isRegistered())
         return false;
-    
+
     if (!client->isAuthed() || !client->_hasNick || !client->_hasUser)
     {
         std::cout << "Cannot register yet, missing info" << std::endl;
         return false;
     }
-    
+
     client->setRegistered();
-    
+
     if (client->isRegistered())
     {
         std::cout << "Registered!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
@@ -321,13 +328,13 @@ bool Server::attemptRegistration(Client *client)
         client->sendMsgToClient(":ircserv 003 " + nick + " :This server was created today\r\n");
         client->sendMsgToClient(":ircserv 004 " + nick + " ircserv 1.0 o o\r\n");
     }
-    
+
     return true;
 }
 
 void Server::ditchDisconnectedClients()
 {
-    
+
     std::map<int, Client*>::iterator it = _clients.begin();
     while(it != _clients.end())
     {
@@ -336,16 +343,16 @@ void Server::ditchDisconnectedClients()
             std::map<std::string, Channel*>::iterator chan;
             for (chan = _channels.begin(); chan != _channels.end(); ++chan)
             	chan->second->removeClient(it->second);
-            
+
             int fd = it->second->getFd();
             if (fd != -1)
                 close(fd);
             delete it->second;
-            
+
             std::map<int, Client*>::iterator toErase = it;
             ++it;
             _clients.erase(toErase);
-        
+
             for (std::vector<struct pollfd>::iterator it_p = _pollfds.begin(); it_p != _pollfds.end(); ++it_p)
             {
                 if (it_p->fd == fd)
@@ -373,7 +380,7 @@ void Server::cleanup()
         }
     }
     _pollfds.clear();
-    
+
     for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
         delete it->second;
@@ -385,7 +392,7 @@ void Server::cleanup()
         delete it->second;
     }
     _channels.clear();
-    
+
     if (_servinfo)
     {
         freeaddrinfo(_servinfo);
@@ -404,9 +411,9 @@ bool Server::getGoing()
 {
     if (!setListeningSocket())
         throw std::runtime_error("Could not set socket");
-    g_serverInstance = this; 
+    g_serverInstance = this;
     pollEvents();
-    
+
     return true;
 }
 
@@ -415,7 +422,7 @@ Channel* Server::getOrCreateChannel(const std::string &name)
     std::map<std::string, Channel*>::iterator it = _channels.find(name);
     if (it != _channels.end())
         return it->second;
-    
+
     Channel* newChannel = new Channel(name);
     _channels[name] = newChannel;
     std::cout << "Created new channel: " << name << std::endl;

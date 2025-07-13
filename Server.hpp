@@ -34,24 +34,24 @@
 
 #define BACKLOG 10 // number of pending connections that the queue will hold
 
-extern volatile __sig_atomic_t g_oOn;
+extern volatile sig_atomic_t g_oOn;
 
 class Server
 {
 	public:
 		Server(int port, const std::string &password);
-		
+
 		~Server();
-		
+
 		bool getGoing();
-		
+
 		void cleanup();
 		Channel* getOrCreateChannel(const std::string &name);
 		std::vector<Channel*> getChannelsForClient(Client *client);
 		Channel* getChannel(const std::string &channelName);
 		Client* getClientByNickname(const std::string &nickname);
 
-		
+
 	private:
 		int _sockfd;
 		int _port;
@@ -59,28 +59,28 @@ class Server
 		int _status;
 		struct addrinfo _hints; // will point to struct addrinfo that we fill out
 		struct addrinfo *_servinfo; // will point to the results
-		
+
 		std::vector<struct pollfd> _pollfds;
-		
+
 		std::map<int, Client*> _clients;
 		std::map<std::string, Channel*> _channels;
-		
+
 		bool configAddrInfo();
-		
+
 		bool setListeningSocket();
 		void pollEvents();
 		bool pushNewClient();
 		bool processClientInput(size_t index);
-		
+
 		bool getLineFromRingBuffer(Client *client, std::string &line);
-		
+
 		CommandControl _cmdControl;
-		
+
 		bool attemptAuth(Client *client);
 		bool attemptRegistration(Client *client);
 
 		void ditchDisconnectedClients();
-		
+
 		Server();
 		Server(const Server &source);
 		Server & operator = (const Server &source);

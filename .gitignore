@@ -1,0 +1,18 @@
+# macOS system files
+.DS_Store
+
+# Compiled object files
+*.o
+*.obj
+
+# Executables
+ircserv
+ircbot
+bot
+
+# Dependency files
+*.d
+
+# IDE/project files (optional)
+.vscode/
+.idea/
