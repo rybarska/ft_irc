@@ -22,6 +22,7 @@
 #include <sys/socket.h>
 #include <poll.h>
 #include <errno.h>
+#include <csignal>
 
 extern volatile sig_atomic_t g_oOnBotting;
 
