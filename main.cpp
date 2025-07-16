@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <csignal>
 #include <cstdio>
 #include "Server.hpp"
 #include "commandLineUtils.cpp"
