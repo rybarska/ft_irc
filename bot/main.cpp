@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <csignal>
 #include <cstdio>
 #include "Bot.hpp"
 #include "commandLineUtils.cpp"
