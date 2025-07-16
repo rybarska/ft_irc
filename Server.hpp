@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <stdexcept> // for runtime_error
 #include <unistd.h> // for close()
+#include <signal.h>
 #include <netdb.h> // for struct addrinfo, getaddrinfo()
 #include <netinet/in.h>
 #include <cstring> //for memset()
